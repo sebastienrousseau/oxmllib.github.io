@@ -38,7 +38,7 @@ jobs:
           key: cargo-ssg-${{ runner.os }}-0.0.63
 
       - name: Install ssg
-        run: command -v ssg || cargo install cargo-ssg --version 0.0.63 --locked
+        run: command -v ssg || cargo install ssg --version 0.0.63 --locked
 
       - name: Build the site
         run: make build
