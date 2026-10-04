@@ -1,0 +1,24 @@
+site_name = "oxml"
+site_title = "oxml — A pure Rust XML toolkit with zero unsafe code"
+site_description = "A pure Rust XML toolkit with zero unsafe code: parsing, an ergonomic tree, XPath 1.0, CLI, WebAssembly, LSP, and MCP server."
+base_url = "https://oxmllib.com"
+language = "en-GB"
+
+content_dir = "content"
+template_dir = "_layouts"
+output_dir = "public"
+
+[i18n]
+default_locale = "en"
+locales = ["en", "fr"]
+url_prefix = "sub_path"
+
+[agents]
+agents_txt = true
+ai_plugin = true
+
+[agents.mcp]
+enabled = true
+
+[edge_headers]
+targets = ["netlify", "cloudflare"]

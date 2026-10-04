@@ -1,0 +1,224 @@
+# Typed front-matter contract for oxmllib.com (Lucid theme)
+
+[[schemas]]
+name = "page"
+
+[[schemas.fields]]
+name = "author"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "base_path"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "changefreq"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "copyright"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "copyright_year"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "date"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "description"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "en_current"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "footer_note"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "fr_current"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "headline"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "keywords"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "label_docs"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_footer_nav"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_langs"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_made_with"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_menu"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_nav"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_skip"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_theme"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_theme_system"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_theme_light"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "label_theme_dark"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "language"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "layout"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "lead"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "locale_path"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "name"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "nav_home"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_install"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_cli"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_xpath"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_wasm"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_mcp"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_lsp"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_schema"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_arch"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_conformance"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_a11y"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "schema"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "screenshot_alt"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "short_name"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "title"
+type = "string"
+required = true
+
+[[schemas.fields]]
+name = "translation_key"
+type = "string"
+required = true

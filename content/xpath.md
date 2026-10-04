@@ -1,0 +1,124 @@
+---
+name: "oxml"
+short_name: "OXML"
+title: "XPath 1.0 Engine — oxml"
+description: "Full XPath 1.0 specification support with axes, functions, predicates, and dynamic variables."
+keywords: "rust xml parser, xpath 1.0, oxml, zero unsafe code, xml schema, webassembly xml, mcp xml"
+author: "Sebastien Rousseau"
+date: "2026-10-04"
+layout: "doc"
+language: "en"
+lang_code: "EN"
+lang_change: "Change language"
+schema: "page"
+changefreq: "weekly"
+copyright_year: "2026"
+translation_key: "xpath"
+locale_path: "/"
+base_path: "/"
+en_current: " aria-current=\"true\""
+fr_current: ""
+slug_install: "installation"
+slug_cli: "cli"
+slug_xpath: "xpath"
+slug_wasm: "wasm"
+slug_mcp: "mcp"
+slug_lsp: "lsp"
+slug_schema: "schema"
+slug_arch: "architecture"
+slug_conformance: "conformance"
+slug_a11y: "accessibility"
+label_skip: "Skip to main content"
+label_menu: "Menu"
+label_nav: "Main"
+label_langs: "Language"
+label_theme: "Theme"
+label_theme_system: "System"
+label_theme_light: "Light"
+label_theme_dark: "Dark"
+label_docs: "Documentation"
+label_footer_nav: "Documentation"
+label_made_with: "Made with SSG"
+label_docs_nav: "Documentation sections"
+label_crumbs: "Breadcrumb"
+label_pager: "Page"
+label_prev: "Previous"
+label_next: "Next"
+label_toc: "On this page"
+nav_home: "Home"
+nav_install: "Installation"
+nav_cli: "CLI Tool"
+nav_xpath: "XPath 1.0"
+nav_wasm: "WebAssembly"
+nav_mcp: "MCP Server"
+nav_lsp: "Language Server"
+nav_schema: "XML Schema"
+nav_arch: "Architecture"
+nav_conformance: "Conformance"
+nav_a11y: "Accessibility"
+footer_note: "A pure Rust XML toolkit with zero unsafe code, published under MIT or Apache-2.0."
+copyright: "© 2026 Sebastien Rousseau. Licensed under MIT or Apache-2.0."
+eyebrow: "Documentation"
+headline: "XPath 1.0 Evaluation Engine"
+lead: "Query and traverse XML trees with complete compliance, type conversion, and sub-expression optimization."
+prev_href: "/cli/"
+prev_label: "CLI Tool"
+next_href: "/mcp/"
+next_label: "MCP Server"
+toc_1: "Syntax & Axes"
+toc_1_id: "syntax"
+toc_2: "Standard Functions"
+toc_2_id: "functions"
+toc_3: "Rust API"
+toc_3_id: "api"
+cur_install: ""
+cur_cli: ""
+cur_xpath: " aria-current=\"page\""
+cur_wasm: ""
+cur_mcp: ""
+cur_lsp: ""
+cur_schema: ""
+cur_arch: ""
+cur_conformance: ""
+cur_a11y: ""
+form_origin: "https://oxmllib.com"
+screenshot_alt: "The oxml documentation website showing navigation, code examples, and architecture guides."
+---
+
+## Syntax & Axes
+
+`oxml` implements the complete W3C XPath 1.0 specification, including all 13 navigational axes:
+
+- `child::` and `descendant::`
+- `parent::` and `ancestor::`
+- `following-sibling::` and `preceding-sibling::`
+- `attribute::` (or `@attr`)
+- `self::` and `descendant-or-self::` (or `//`)
+
+## Standard Functions
+
+Built-in support for all core XPath 1.0 function libraries:
+
+- **Node-set functions:** `count()`, `id()`, `local-name()`, `namespace-uri()`, `name()`
+- **String functions:** `string()`, `concat()`, `starts-with()`, `contains()`, `substring-before()`, `substring-after()`, `substring()`, `string-length()`, `normalize-space()`, `translate()`
+- **Boolean functions:** `boolean()`, `not()`, `true()`, `false()`, `lang()`
+- **Number functions:** `number()`, `sum()`, `floor()`, `ceiling()`, `round()`
+
+## Rust API
+
+Evaluate queries easily from Rust code:
+
+```rust
+use oxml::{Document, Value};
+
+let xml = r#"<store><book price="20"/><book price="40"/></store>"#;
+let doc = Document::parse(xml)?;
+
+// Select nodes
+let books = doc.select("//book[@price > 25]")?;
+assert_eq!(books.len(), 1);
+
+// Evaluate numerical expressions
+let total: f64 = doc.eval_number("sum(//book/@price)")?;
+assert_eq!(total, 60.0);
+```

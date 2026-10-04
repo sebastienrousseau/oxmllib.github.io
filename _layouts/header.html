@@ -1,0 +1,54 @@
+<header class="masthead">
+  <div class="lu-shell masthead-in">
+    <a class="brand" href="{{locale_path}}">
+      <svg class="brand-mark" width="28" height="28" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <rect width="32" height="32" rx="7" fill="currentColor" />
+        <path d="M10 11L5 16L10 21M22 11L27 16L22 21M19 9L13 23" stroke="var(--bg)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+      </svg>
+      <span class="brand-name">{{name}}</span>
+    </a>
+
+    <button
+      class="nav-btn"
+      type="button"
+      id="nav-toggle"
+      aria-expanded="false"
+      aria-controls="site-nav"
+    >{{label_menu}}</button>
+
+    <nav class="site-nav" id="site-nav" aria-label="{{label_nav}}">
+      <ul class="nav-list">
+        <li><a href="{{locale_path}}installation/">{{nav_install}}</a></li>
+        <li><a href="{{locale_path}}cli/">{{nav_cli}}</a></li>
+        <li><a href="{{locale_path}}xpath/">{{nav_xpath}}</a></li>
+        <li><a href="{{locale_path}}mcp/">{{nav_mcp}}</a></li>
+        <li><a href="{{locale_path}}wasm/">{{nav_wasm}}</a></li>
+        <li><a href="{{locale_path}}schema/">{{nav_schema}}</a></li>
+      </ul>
+    </nav>
+
+    <div class="masthead-tools">
+      <details class="ap-lang">
+      <summary class="ap-lang-toggle" title="{{label_langs}}">
+      <span class="ap-lang-globe">🌐</span>
+      <span class="ap-lang-current">{{lang_code}}</span>
+      <span class="visually-hidden">, {{lang_change}}</span>
+      </summary>
+      <div class="ap-lang-menu">
+      <div class="ap-lang-menu-grid">
+      <a class="ap-lang-item" href="{{base_path}}?lang=en" hreflang="en" lang="en"{{!en_current}}>English</a>
+      <a class="ap-lang-item" href="{{base_path}}fr/?lang=fr" hreflang="fr" lang="fr"{{!fr_current}}>Français</a>
+      </div>
+      </div>
+      </details>
+      <span data-ssg-search></span>
+      <button class="theme-toggle" type="button" id="mode-toggle"
+        data-label-light="{{label_theme_light}}"
+        data-label-dark="{{label_theme_dark}}">
+        <span class="visually-hidden">{{label_theme}}</span>
+        <span class="visually-hidden" id="mode-state" data-label-system="{{label_theme_system}}">{{label_theme_system}}</span>
+        <span class="theme-icon" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</header>

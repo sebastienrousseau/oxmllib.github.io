@@ -1,0 +1,6 @@
+# Build output: GitHub Pages publishes the artefact the workflow builds.
+public/
+public.build-tmp/
+node_modules/
+.DS_Store
+*.log
