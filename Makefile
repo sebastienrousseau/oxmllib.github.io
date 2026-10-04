@@ -15,6 +15,8 @@ build:
 	@cp -f _layouts/assets/* public/assets/ 2>/dev/null || true
 	@cp -f _layouts/favicon.ico public/favicon.ico 2>/dev/null || true
 	@cp -f CNAME public/CNAME
+	@cp -f public/404/index.html public/404.html 2>/dev/null || true
+	@touch public/.nojekyll
 	@# Publish highlight.css at root
 	@hl=$$(find public -maxdepth 2 -name 'highlight.*.css' -print -quit); [ -n "$$hl" ] && cp -f "$$hl" public/highlight.css || true
 

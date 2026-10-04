@@ -46,10 +46,11 @@ jobs:
       - name: Run quality gates
         run: make check
 
-      - name: Ensure CNAME and .nojekyll in build output
+      - name: Ensure CNAME, .nojekyll, and 404 in build output
         run: |
           cp CNAME public/CNAME
           touch public/.nojekyll
+          cp public/404/index.html public/404.html
 
       - name: Verify generated artifacts
         run: |
