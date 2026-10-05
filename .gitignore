@@ -2,5 +2,7 @@
 public/
 public.build-tmp/
 node_modules/
+target/
+examples/target/
 .DS_Store
 *.log

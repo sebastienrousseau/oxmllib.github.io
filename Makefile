@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # oxmllib.com — Static documentation site compiled with ssg (Lucid theme)
 
-.PHONY: all build clean serve check audit
+.PHONY: all build clean serve check audit test-snippets
 
 all: build
 
@@ -25,8 +25,11 @@ build:
 serve: build
 	ssg dev --config ssg.toml
 
-check: build
+test-snippets:
+	cargo check --manifest-path examples/Cargo.toml --bins
+
+check: build test-snippets
 	ssg check --config ssg.toml
 
 clean:
-	@rm -rf public *.log
+	@rm -rf public *.log examples/target

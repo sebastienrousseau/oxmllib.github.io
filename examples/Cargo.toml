@@ -1,0 +1,16 @@
+[package]
+name = "oxml-site-snippets"
+version = "0.0.10"
+edition = "2021"
+publish = false
+
+[dependencies]
+oxml = { version = "0.0.10", path = "../../../Rust/oxml/crates/oxml" }
+
+[[bin]]
+name = "hero"
+path = "hero.rs"
+
+[[bin]]
+name = "tree"
+path = "tree.rs"
