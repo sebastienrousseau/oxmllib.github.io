@@ -1,9 +1,9 @@
 ---
 name: "oxml"
 short_name: "OXML"
-title: "Bac à Sable WebAssembly Interactif — oxml"
-description: "Testez vos requêtes XPath 1.0, validez la conformité et formatez vos documents XML directement dans votre navigateur avec Rust WebAssembly pur et sûr."
-keywords: "analyseur xml rust, bac a sable xpath, wasm xml, testeur xpath en ligne, validateur xml, rust pur"
+title: "Studio WebAssembly Interactif — oxml"
+description: "Studio XML et XPath 1.0 haute performance dans votre navigateur : évaluateur XPath en direct, formateur XML, inspection structurelle et diagnostics instantanés propulsés par WebAssembly en Rust pur et sûr."
+keywords: "analyseur xml rust, bac a sable xpath, wasm xml, testeur xpath en ligne, validateur xml, rust pur, inspecteur xml"
 author: "Sebastien Rousseau"
 date: "2026-10-05"
 layout: "doc"
@@ -62,19 +62,19 @@ nav_cookbook: "Livre de recettes"
 nav_playground: "Bac à sable"
 footer_note: "Boîte à outils XML en pur Rust avec zéro code unsafe, sous licences MIT ou Apache-2.0."
 copyright: "© 2026 Sebastien Rousseau. Sous licence MIT ou Apache-2.0."
-eyebrow: "Outil Interactif"
-headline: "Bac à Sable XML WebAssembly"
-lead: "Évaluez des expressions XPath 1.0, vérifiez la bonne formation et formatez vos documents en temps réel grâce à oxml-wasm."
+eyebrow: "Studio Interactif"
+headline: "Studio XML & XPath WebAssembly"
+lead: "Déposez un fichier XML, choisissez un exemple d'entreprise ou collez votre document. L'analyse syntaxique, l'évaluation XPath et l'inspection s'exécutent instantanément dans votre navigateur sans aller-retour serveur."
 prev_href: "/fr/cookbook/"
 prev_label: "Livre de recettes"
 next_href: "/fr/accessibility/"
 next_label: "Accessibilité"
-toc_1: "Moteur Interactif"
-toc_1_id: "playground"
-toc_2: "Fonctionnalités du Bac à Sable"
-toc_2_id: "capabilities"
-toc_3: "Architecture & Sécurité"
-toc_3_id: "security"
+toc_1: "Studio Interactif"
+toc_1_id: "studio"
+toc_2: "Pourquoi Tester Ici ?"
+toc_2_id: "why"
+toc_3: "Garantie Architecturale"
+toc_3_id: "guarantee"
 cur_install: ""
 cur_cli: ""
 cur_xpath: ""
@@ -90,57 +90,106 @@ cur_migrate_roxmltree: ""
 cur_cookbook: ""
 cur_playground: " aria-current=\"page\""
 form_origin: "https://oxmllib.com"
-screenshot_alt: "Le bac à sable interactif WebAssembly oxml évaluant des requêtes XPath dans le navigateur."
+screenshot_alt: "Le studio interactif WebAssembly oxml évaluant des requêtes XPath et inspectant du XML dans le navigateur."
 ---
-
-## Moteur Interactif
-
-Testez le traitement XML sans rien installer. Le bac à sable ci-dessous exécute le binaire Rust WebAssembly directement dans l'onglet de votre navigateur, sans aucun aller-retour serveur.
 
 <div class="playground-box" id="oxml-playground">
 <div class="playground-header">
 <div>
-<h2 class="playground-title">Moteur WebAssembly en Temps Réel</h2>
-<p class="field-hint">Exécution en Rust pur sécurisé directement dans le bac à sable de votre navigateur.</p>
+<h2 class="playground-title">Moteur WebAssembly (Bac à Sable Local)</h2>
+<p class="field-hint">Propulsé par <code>oxml-wasm 0.0.10</code> · 100 % Rust Sûr Côté Client · Zéro Donnée Transmise</p>
 </div>
 <span id="playground-status" class="status-tag">Initialisation du moteur...</span>
 </div>
 
-<div class="playground-grid">
-<div class="playground-col">
+<!-- Étape 1 : Ajouter des données -->
+<div class="demo-step">
+<div class="step-head">
+<span class="step-num" aria-hidden="true">1</span>
+<h3 class="step-title">Ajouter Votre Document XML</h3>
+</div>
+
+<div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Déposez le fichier XML ici ou cliquez pour parcourir">
+<p><strong>Glissez-déposez un fichier XML, RSS, Atom ou SVG ici</strong> ou cliquez pour parcourir</p>
+<p class="hint">Maximum 10 Mo · Traitement local dans le bac à sable du navigateur, jamais envoyé à un serveur</p>
+</div>
+<input type="file" id="file-input" class="visually-hidden" accept=".xml,.rss,.atom,.svg,.txt,text/xml,application/xml" aria-label="Choisir un fichier XML à évaluer" tabindex="-1" />
+
+<div class="demo-toolbar">
+<label class="visually-hidden" for="sample-select">Charger un lot d'exemples</label>
+<select id="sample-select" class="pill-select">
+<option value="books">Exemple : Catalogue de librairie (Prix &amp; Catégories)</option>
+<option value="rss">Exemple : Flux RSS 2.0 (Canaux &amp; Articles)</option>
+<option value="atom">Exemple : Flux Atom 1.0 avec espaces de noms</option>
+<option value="svg">Exemple : Graphique vectoriel SVG</option>
+<option value="pain001">Exemple : Virement financier ISO 20022 (pain.001)</option>
+<option value="pom">Exemple : Modèle de projet Maven (Hiérarchie profonde)</option>
+</select>
+
+<label class="visually-hidden" for="scenario-select">Injecter un scénario d'erreur</label>
+<select id="scenario-select" class="pill-select">
+<option value="">Injecter un scénario d'erreur...</option>
+<option value="unclosed">Erreur : Balise non fermée (&lt;title&gt;...&lt;author&gt;)</option>
+<option value="ampersand">Erreur : Entité &amp; non échappée (AT&amp;T)</option>
+<option value="root_mismatch">Erreur : Incompatibilité de balise racine (&lt;root&gt;...&lt;/catalog&gt;)</option>
+<option value="unquoted_attr">Erreur : Valeur d'attribut non entourée de guillemets (id=b101)</option>
+</select>
+
+<button type="button" id="paste-btn" class="pill pill-ghost">Coller XML</button>
+<button type="button" id="clear-btn" class="pill pill-ghost">Effacer</button>
+</div>
+
 <div class="playground-field">
-<label for="playground-samples">Charger un Exemple de Document XML</label>
-<select id="playground-samples" class="playground-select">
-<option value="books">Catalogue de Librairie (Filtres XPath &amp; Prédicats Numériques)</option>
-<option value="rss">Flux RSS 2.0 (Extraction des Canaux &amp; Articles)</option>
-<option value="atom">Flux Atom avec Espaces de Noms (Liaison de Préfixe)</option>
-<option value="svg">Graphique Vectoriel SVG (Attributs &amp; Opérateurs d'Union)</option>
+<label for="playground-xml">Examiner et éditer la source XML</label>
+<textarea id="playground-xml" class="playground-textarea" spellcheck="false" rows="11" aria-label="Source du document XML"></textarea>
+</div>
+</div>
+
+<!-- Étape 2 : Atelier XPath -->
+<div class="demo-step">
+<div class="step-head">
+<span class="step-num" aria-hidden="true">2</span>
+<h3 class="step-title">Atelier XPath 1.0 &amp; Espaces de Noms</h3>
+</div>
+
+<div class="demo-toolbar">
+<label class="visually-hidden" for="recipe-select">Recettes XPath</label>
+<select id="recipe-select" class="pill-select">
+<option value="">Recettes XPath rapides...</option>
+<option value="//book[price &lt; 30]/title/text()">Filtre : Livres à moins de 30 $</option>
+<option value="count(//book)">Fonction : count(//book)</option>
+<option value="//book[1]/title | //book[last()]/title">Union : Titres du premier &amp; dernier livre</option>
+<option value="//@category">Axe : Tous les attributs @category</option>
+<option value="//item[contains(title, 'Release')]/link">Prédicat texte : contains(title, 'Release')</option>
+<option value="//atom:entry/atom:title/text()">Espace de noms : //atom:entry/atom:title</option>
 </select>
 </div>
 
-<div class="playground-field">
-<label for="playground-xml">Source du Document XML</label>
-<textarea id="playground-xml" class="playground-textarea" spellcheck="false" rows="12" aria-label="Source du Document XML"></textarea>
-</div>
-
-<div class="playground-field">
+<div class="playground-field" style="margin-bottom: 0.75rem;">
 <label for="playground-xpath">Expression XPath 1.0</label>
 <input type="text" id="playground-xpath" class="playground-input" placeholder="//book[price &lt; 30]/title" value="//book[price &lt; 30]/title" spellcheck="false" />
 </div>
 
-<div class="playground-field">
-<label for="playground-ns">Liaisons d'Espaces de Noms (Optionnel : prefix=uri, ...)</label>
-<input type="text" id="playground-ns" class="playground-input" placeholder="ex: atom=http://www.w3.org/2005/Atom" spellcheck="false" />
+<div class="playground-field" style="margin-bottom: 1rem;">
+<label for="playground-ns">Liaisons d'espaces de noms (Optionnel : prefix=URI, ...)</label>
+<input type="text" id="playground-ns" class="playground-input" placeholder="ex : atom=http://www.w3.org/2005/Atom, default=urn:isbn:0-486-27557-4" spellcheck="false" />
+<span class="field-hint">Détecté automatiquement à partir de la déclaration du document si disponible.</span>
 </div>
 
-<div class="playground-actions">
-<button type="button" id="btn-eval-xpath" class="playground-btn btn-primary">Évaluer XPath</button>
-<button type="button" id="btn-check-wf" class="playground-btn">Vérifier la Syntaxe</button>
-<button type="button" id="btn-format-xml" class="playground-btn">Formater XML</button>
+<div class="demo-toolbar">
+<button type="button" id="btn-eval-xpath" class="pill pill-primary">Évaluer XPath</button>
+<button type="button" id="btn-check-wf" class="pill pill-ghost">Vérifier la bonne formation</button>
+<button type="button" id="btn-format-xml" class="pill pill-ghost">Formater XML</button>
 </div>
 </div>
 
-<div class="playground-col">
+<!-- Étape 3 : Vérification par couches & Résultats -->
+<div class="demo-step">
+<div class="step-head">
+<span class="step-num" aria-hidden="true">3</span>
+<h3 class="step-title">Vérification par Couches &amp; Résultats d'Inspection</h3>
+</div>
+
 <div class="playground-stats" aria-label="Statistiques du document">
 <div class="stat-pill">
 <span class="stat-label">Nœud Racine</span>
@@ -151,42 +200,78 @@ Testez le traitement XML sans rien installer. Le bac à sable ci-dessous exécut
 <span id="stat-nodes" class="stat-val">—</span>
 </div>
 <div class="stat-pill">
-<span class="stat-label">Temps d'Exéc</span>
+<span class="stat-label">Temps d'Exécution</span>
 <span id="stat-time" class="stat-val">—</span>
 </div>
 <div class="stat-pill">
-<span class="stat-label">Correspondances</span>
+<span class="stat-label">Nœuds Correspondants</span>
 <span id="stat-matches" class="stat-val">—</span>
+</div>
+<div class="stat-pill">
+<span class="stat-label">Taille d'Entrée</span>
+<span id="stat-chars" class="stat-val">—</span>
 </div>
 </div>
 
-<div class="playground-field playground-output-box">
-<label for="playground-output">Résultats de l'Évaluation</label>
-<pre id="playground-output" class="playground-output" tabindex="0" role="region" aria-live="polite">Évaluation en cours...</pre>
+<div class="layer-summary-wrap">
+<table class="layer-summary" aria-label="Liste de contrôle des couches de validation">
+<tbody>
+<tr>
+<th scope="row">Conformité W3C XML 1.0</th>
+<td id="layer-state-wf" class="layer-state-pass">Évaluation en cours...</td>
+</tr>
+<tr>
+<th scope="row">Modèle Mémoire du Parseur</th>
+<td id="layer-state-mem" class="layer-state-pass">Arène Contiguë Générationnelle (O(1))</td>
+</tr>
+<tr>
+<th scope="row">Scanner de Délimiteurs</th>
+<td id="layer-state-scan" class="layer-state-pass">SWAR SIMD Vectorisé 8 Octets</td>
+</tr>
+<tr>
+<th scope="row">Moteur XPath 1.0 W3C</th>
+<td id="layer-state-xpath" class="layer-state-pass">Conformité Intégrale aux Spécifications</td>
+</tr>
+</tbody>
+</table>
 </div>
+
+<div id="error-banner" class="error-banner" hidden>
+<h4>Alerte Diagnostic du Parseur</h4>
+<p id="error-text">Erreur de syntaxe détectée dans le document XML.</p>
+</div>
+
+<div class="output-tab-list" role="tablist" aria-label="Modes de visualisation des résultats">
+<button type="button" id="tab-matches" class="output-tab-btn" role="tab" aria-selected="true" aria-controls="output-view">Résultats XPath</button>
+<button type="button" id="tab-formatted" class="output-tab-btn" role="tab" aria-selected="false" aria-controls="output-view">XML Formaté</button>
+<button type="button" id="tab-stats" class="output-tab-btn" role="tab" aria-selected="false" aria-controls="output-view">Structure &amp; Fréquences</button>
+<button type="button" id="tab-json" class="output-tab-btn" role="tab" aria-selected="false" aria-controls="output-view">Jumeau JSON</button>
+</div>
+
+<pre id="output-view" class="output-view" tabindex="0" role="region" aria-live="polite">Évaluation en cours...</pre>
+
+<div class="demo-toolbar" style="margin-top: 1rem;">
+<button type="button" id="copy-btn" class="pill pill-primary">Copier le Résultat</button>
+<button type="button" id="download-xml-btn" class="pill pill-ghost">Télécharger .xml</button>
+<button type="button" id="download-out-btn" class="pill pill-ghost">Télécharger le Résultat</button>
 </div>
 </div>
 </div>
 
 <script type="module" src="/assets/playground.js"></script>
 
-## Fonctionnalités du Bac à Sable
+## Pourquoi Tester Ici ?
 
-Le bac à sable utilise exactement le même moteur que les versions serveur Rust, `oxml-cli` et `oxml-mcp` :
+1. **Exécution Sub-Milliseconde :**
+   - Propulsé par `oxml-wasm 0.0.10`, le cœur du moteur d'analyse alloue des arènes contiguës générationnelles sans pause de ramasse-miettes. Les requêtes s'exécutent généralement en moins de 0,20 ms.
+2. **Spécification XPath 1.0 Intégrale :**
+   - Prise en charge complète des axes (`child`, `parent`, `ancestor`, `descendant`, `following-sibling`, `attribute`), comparaisons relationnelles, prédicats numériques, fonctions standard (`count`, `string`, `contains`, `starts-with`) et opérateurs d'union (`path1 | path2`).
+3. **Diagnostics & Scénarios d'Erreurs Réalistes :**
+   - Sélectionnez une option dans le menu **« Injecter un scénario d'erreur... »** pour observer en temps réel la précision avec laquelle le parseur localise les défauts de syntaxe, balises non fermées et erreurs d'encodage.
 
-1. **Spécification Complète XPath 1.0 :**
-   - Chemins de localisation (`/rss/channel/item`), axes d'attributs (`/@lang`, `//@width`), et opérateur d'union (`path1 | path2`).
-   - Prédicats relationnels et arithmétiques (`//book[price < 30]`, `//item[position() <= 2]`).
-   - Fonctions XPath principales (`count(...)`, `string(...)`, `contains(...)`, `starts-with(...)`).
-2. **Espaces de Noms XML Explicites :**
-   - Résolution de requêtes préfixées sur des documents avec espaces de noms par défaut ou personnalisés via `prefix=URI`.
-3. **Vérification Sub-Milliseconde :**
-   - L'arène générationnelle et l'analyse vectorielle SWAR s'exécutent en moins de 0,20 ms pour des documents typiques.
+## Garantie Architecturale
 
-## Architecture & Sécurité
-
-Pourquoi `oxml` propose-t-il un bac à sable dans le navigateur alors que les bibliothèques C (`lxml`, `libxml2`, `xml2`) n'en ont pas ?
-
-- **Zéro Dépendance C :** `lxml` et `xml2` reposent sur plus de 200 000 lignes de code C hérité de `libxml2`. Compiler `libxml2` en WebAssembly nécessite des chaînes Emscripten lourdes et génère des binaires de plusieurs mégaoctets sujets aux fuites de mémoire.
-- **Rust Pur Sécurisé :** `oxml-wasm` se compile nativement via `wasm-pack` avec `#![forbid(unsafe_code)]`. Le binaire pèse moins de 220 Ko compressé.
-- **Bac à Sable Côté Client :** Aucune donnée n'est transmise à un serveur distant. Vos documents, charges utiles et requêtes restent à 100 % dans votre session de navigation locale.
+- **Zéro Donnée Transmise Hors de Votre Machine :**
+  - Ouvrez DevTools &rarr; Network. Les seules requêtes sont des requêtes GET vers le même domaine pour charger les ressources statiques et le binaire WebAssembly de 219 Ko. Vos documents XML, charges utiles et requêtes ne quittent jamais le bac à sable local de votre navigateur.
+- **Rust Pur et Sûr (#![forbid(unsafe_code)]) :**
+  - Contrairement aux bibliothèques C historiques (`libxml2`, `lxml`) sujettes aux corruptions de mémoire et vulnérabilités CVE, `oxml` est développé à 100 % en Rust sûr. Aucun débordement de tampon, pointeur pendant ou déréférencement nul.
