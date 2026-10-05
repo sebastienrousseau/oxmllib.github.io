@@ -72,7 +72,7 @@ lead: "Analysez, mutez, interrogez avec XPath 1.0 et validez avec XSD nativement
 cta_primary: "Commencer"
 cta_secondary: "Architecture"
 cta_final: "Installer oxml aujourd'hui"
-handbook_alt: "Espace de travail développeur illustrant la programmation système"
+hero_image_alt: "Nœuds numériques interconnectés et structures de données illustrant l'arbre DOM XML et le parcours XPath"
 start_h: "Un Moteur, Quatre Runtimes, Un Numéro de Version"
 start_lead: "Exécutez le même moteur XML sécurisé nativement en Rust, en ligne de commande (CLI), avec les agents IA (MCP) ou dans le navigateur avec WebAssembly."
 tabs_label: "Sélecteur d'environnement d'exécution"

@@ -72,7 +72,7 @@ lead: "Parse, mutate, query with XPath 1.0, and validate with XSD natively, in t
 cta_primary: "Get Started"
 cta_secondary: "View Architecture"
 cta_final: "Install oxml Today"
-handbook_alt: "Developer workspace illustrating high performance systems programming"
+hero_image_alt: "Interconnected digital nodes and data structures representing XML DOM trees and XPath traversal"
 start_h: "One Engine, Four Runtimes, One Version Number"
 start_lead: "Run the same memory-safe XML engine natively in Rust, via terminal CLI, inside Claude and AI agents with MCP, or in the browser with WebAssembly."
 tabs_label: "oxml ecosystem runtime selector"
