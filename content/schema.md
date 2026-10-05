@@ -96,23 +96,32 @@ xmlschema = "0.0.10"
 
 ## Validation Example
 
-Validate XML files against standard XSD schemas:
+Validate XML documents against standard XSD schemas:
 
 ```rust
-use xmlschema::Schema;
+use xmlschema::{parse_schema, validate};
 
 let xsd = std::fs::read_to_string("schema.xsd")?;
-let schema = Schema::parse(&xsd)?;
+let schema = parse_schema(&xsd)?;
 
 let xml = std::fs::read_to_string("document.xml")?;
-match schema.validate(&xml) {
-    Ok(()) => println!("Document is strictly valid!"),
-    Err(e) => eprintln!("Validation error: {}", e),
+let doc = oxml::parse(&xml)?;
+let report = validate(&doc, &schema);
+
+if report.is_valid() {
+    println!("Document is strictly valid!");
+} else {
+    for violation in &report.violations {
+        eprintln!("Validation error: {violation}");
+    }
 }
 ```
 
-## Supported Types
+## Supported Types & Facets
 
-- Simple types: string, integer, decimal, boolean, dateTime, date, anyURI
-- Complex types: sequences, choices, all groups
-- Facets: minInclusive, maxInclusive, length, minLength, maxLength, pattern (regex), enumeration
+- **Simple types:** string, integer, decimal, boolean, dateTime, date, anyURI, hexBinary, base64Binary
+- **Complex types:** sequences, choices, all groups, attribute declarations
+- **Restriction facets:** minInclusive, maxInclusive, minExclusive, maxExclusive, length, minLength, maxLength, pattern (regex engine), enumeration
+- **Value-space comparisons:** enumerations compare in the datatype value space (e.g. `true` and `1`, numeric formatting, case-insensitive `hexBinary`)
+- **Binary length validation:** octet-based length validation for `xs:hexBinary` and `xs:base64Binary`
+- **W3C Conformance:** **95.2% pass rate** over 35,942 decided tests (34,226 pass, 0 panics) across the 39,420-test W3C XSD test suite.

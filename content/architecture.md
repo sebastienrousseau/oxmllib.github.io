@@ -106,3 +106,11 @@ Every boundary check is verified at compile-time or hardware-accelerated without
 ## SWAR Acceleration
 
 Safe delimiter scanning uses SIMD Within A Register (SWAR) across 8-byte chunks to scan character data and attribute values, delivering over +149% throughput vs scalar scanning without unsafe intrinsics.
+
+## Zero-Copy Streaming Borrowing
+
+For high-throughput pipelines where memory allocation overhead must be eliminated:
+
+- `Reader::next_borrowed()` yields `BorrowedEvent<'a>` items that borrow string slices directly from the internal input buffer.
+- Text nodes, tag names, and attribute values are inspected with zero heap copies.
+- Preserves full streaming memory bounds while achieving peak throughput.

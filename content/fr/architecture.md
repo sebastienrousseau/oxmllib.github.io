@@ -106,3 +106,11 @@ Toutes les vérifications de bornes sont garanties au niveau du compilateur.
 ## Accélération SWAR
 
 Le balayage rapide de délimiteurs s'appuie sur la technique SWAR (SIMD Within A Register) par blocs de 8 octets, doublant le débit sans aucune instruction unsafe.
+
+## Emprunt en Flux Zéro-Copie
+
+Pour les flux de données à très haut débit nécessitant l'élimination des allocations mémoire :
+
+- `Reader::next_borrowed()` produit des événements `BorrowedEvent<'a>` qui empruntent directement les tranches de chaînes (`&str`) depuis le tampon interne.
+- Nœuds de texte, noms de balises et attributs sont inspectés sans duplication sur le tas.
+- Garantit une empreinte mémoire minimale et des performances maximales.

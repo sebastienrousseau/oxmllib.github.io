@@ -87,12 +87,13 @@ screenshot_alt: "The oxml documentation website showing navigation, code example
 
 ## Outils Agent
 
-`oxml-mcp` expose des outils structurés pour les modèles de langage :
+`oxml-mcp` expose cinq outils structurés pour les modèles de langage :
 
-- **`parse_xml`** : Analyser du XML en arbre d'inspection hiérarchique.
-- **`xpath_query`** : Évaluer des expressions XPath et renvoyer les données structurées.
-- **`validate_xsd`** : Valider des documents selon les schémas W3C XSD.
-- **`check_wellformed`** : Diagnostic instantané de syntaxe et de conformité.
+- **`xml_check`** : Diagnostic instantané de syntaxe et de conformité sans construire d'arbre en mémoire.
+- **`xml_format`** : Mise en forme, indentation personnalisable et minification avec gestion des balises vides (`self-closing`, `spaced`, `expanded`).
+- **`xml_inspect`** : Inspection structurelle (racine, profondeur, fréquences des éléments, espaces de noms).
+- **`xml_query`** : Évaluation d'expressions XPath 1.0 retournant les valeurs textuelles ou comptages.
+- **`xml_validate`** : Validation stricte selon les schémas W3C XML Schema (XSD) avec localisation précise des erreurs.
 
 ## Configuration
 

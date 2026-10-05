@@ -120,3 +120,8 @@ assert_eq!(books.len(), 1);
 let total: f64 = doc.eval_number("sum(//book/@price)")?;
 assert_eq!(total, 60.0);
 ```
+
+## Optimisations de Performance
+
+- **Prédicats Entiers O(1) :** Évaluation instantanée en temps constant pour les prédicats numériques indexés (ex. `//item[1]`, `//row[5]`), évitant l'évaluation complète d'arbres d'expressions.
+- **Parcours d'Axes Optimisé :** Itération directe au sein de l'arène pour les axes usuels (`child::`, `descendant-or-self::` / `//`), réduisant les allocations et les défauts de prédiction de branchement.

@@ -122,3 +122,8 @@ assert_eq!(books.len(), 1);
 let total: f64 = doc.eval_number("sum(//book/@price)")?;
 assert_eq!(total, 60.0);
 ```
+
+## Performance Optimizations
+
+- **O(1) Integer Predicates:** Constant-time fast-path evaluation for 1-based numeric predicates (e.g. `//item[1]`, `//row[5]`), skipping full expression subtree evaluations.
+- **Optimized Axis Traversal:** Direct arena iteration for common axes like `child::` and `descendant-or-self::` (`//`), minimizing allocations and branch mispredictions.

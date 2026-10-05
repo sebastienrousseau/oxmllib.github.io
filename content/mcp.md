@@ -87,12 +87,13 @@ screenshot_alt: "The oxml documentation website showing navigation, code example
 
 ## Agent Tools
 
-`oxml-mcp` exposes high-level, structured tools to LLMs:
+`oxml-mcp` exposes five high-level, structured tools to LLMs:
 
-- **`parse_xml`**: Parse XML into an inspection tree with node hierarchies and counts.
-- **`xpath_query`**: Evaluate XPath expressions and return structured result sets.
-- **`validate_xsd`**: Validate documents against W3C XML Schema definitions.
-- **`check_wellformed`**: Instant syntax and well-formedness diagnostics.
+- **`xml_check`**: Fast syntax and well-formedness diagnostics without building an in-memory tree.
+- **`xml_format`**: Format, indent (customizable spaces), or minify XML with empty-element style controls (`self-closing`, `spaced`, `expanded`).
+- **`xml_inspect`**: Structural inspection returning root name, depth, element frequencies, and declared namespaces.
+- **`xml_query`**: Evaluate XPath 1.0 expressions and return matching string values or counts.
+- **`xml_validate`**: Validate documents against W3C XML Schema (XSD) definitions with exact line and column diagnostics.
 
 ## Configuration
 

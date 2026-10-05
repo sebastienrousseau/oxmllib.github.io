@@ -85,13 +85,21 @@ form_origin: "https://oxmllib.com"
 screenshot_alt: "The oxml documentation website showing navigation, code examples, and architecture guides."
 ---
 
-## W3C Test Suite
+## W3C XML Test Suite
 
 `oxml` integrates the official W3C XML Conformance Test Suite (`xmlts20130923`) directly into automated CI:
 
 - Automated test runner downloads and verifies official XML 1.0 test cases.
 - Validates well-formedness, entity expansion limits, and character encodings (UTF-8, UTF-16).
 - Rejects non-well-formed XML documents with deterministic diagnostic locations.
+
+## W3C XML Schema (XSD) Conformance
+
+`xmlschema` is verified continuously against the official W3C XML Schema Test Suite (`xsts-2007-06-20`), pinned by SHA-256 hash:
+
+- **39,420 total test cases** executed in automated CI under release mode.
+- **95.2% pass rate** across 35,942 decided tests (34,226 passed, 1,716 failed, 0 panics).
+- **91.2% total suite coverage** with ratcheted baseline enforcement guarding against regressions.
 
 ## Throughput Benchmarks
 

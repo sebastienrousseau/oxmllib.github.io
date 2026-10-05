@@ -85,13 +85,21 @@ form_origin: "https://oxmllib.com"
 screenshot_alt: "The oxml documentation website showing navigation, code examples, and architecture guides."
 ---
 
-## Suite W3C
+## Suite W3C XML
 
 `oxml` intègre la suite officielle de conformité W3C XML (`xmlts20130923`) dans ses tests continus :
 
 - Téléchargement et vérification automatisés des cas de test XML 1.0.
 - Validation de la syntaxe, de l'expansion d'entités et des encodages (UTF-8, UTF-16).
 - Rejet systématique des documents non conformes avec localisation précise des erreurs.
+
+## Conformité W3C XML Schema (XSD)
+
+`xmlschema` est vérifié en continu contre la suite officielle de tests W3C XML Schema (`xsts-2007-06-20`), vérifiée par empreinte SHA-256 :
+
+- **39 420 cas de test au total** exécutés sous CI en mode release.
+- **95,2 % de réussite** sur 35 942 tests tranchés (34 226 réussites, 1 716 échecs, 0 panique).
+- **91,2 % de couverture globale de la suite** avec cliquet anti-régression strict.
 
 ## Mesures de Débit
 
