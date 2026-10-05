@@ -119,26 +119,75 @@ Le balayage rapide de délimiteurs s'appuie sur la technique SWAR (SIMD Within A
 
 L'écosystème `oxml` est articulé en crates découplés partageant le même cœur sécurisé :
 
-```mermaid
-graph TD
+<figure class="diagram-card">
+  <svg viewBox="0 0 800 400" width="800" height="400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="arch-diag1-fr-title arch-diag1-fr-desc">
+    <title id="arch-diag1-fr-title">Diagramme d'Architecture de l'Écosystème oxml</title>
+    <desc id="arch-diag1-fr-desc">Diagramme illustrant le moteur central oxml (Analyseur, DOM, XPath 1.0) se ramifiant en six crates d'intégrations et outils : oxml-cli, oxml-wasm, oxml-mcp, oxml-lsp, oxml-json et xmlschema.</desc>
+    <defs>
+      <marker id="arrow-fr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)" />
+      </marker>
+    </defs>
+    <!-- Background Frame for Toolchain -->
+    <rect x="20" y="160" width="760" height="220" rx="12" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="40" y="188" font-family="var(--sans)" font-size="12" font-weight="700" letter-spacing="0.06em" fill="var(--ink-muted)">INTÉGRATIONS &amp; OUTILS</text>
+    <!-- Core Engine Box -->
+    <rect x="250" y="24" width="300" height="84" rx="10" fill="var(--surface)" stroke="var(--accent)" stroke-width="2" />
+    <text x="400" y="50" font-family="var(--sans)" font-size="11" font-weight="700" letter-spacing="0.08em" fill="var(--accent)" text-anchor="middle">CŒUR SÉCURISÉ</text>
+    <text x="400" y="74" font-family="var(--mono)" font-size="18" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml</text>
+    <text x="400" y="94" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">Analyseur · DOM Générationnel · XPath 1.0</text>
+    <!-- Trunk Line & Distributor -->
+    <line x1="400" y1="108" x2="400" y2="135" stroke="var(--ink-soft)" stroke-width="2" />
+    <line x1="150" y1="135" x2="650" y2="135" stroke="var(--ink-soft)" stroke-width="2" />
+    <!-- Drops to Row 1 -->
+    <line x1="150" y1="135" x2="150" y2="204" stroke="var(--ink-soft)" stroke-width="2" marker-end="url(#arrow-fr)" />
+    <line x1="400" y1="135" x2="400" y2="204" stroke="var(--ink-soft)" stroke-width="2" marker-end="url(#arrow-fr)" />
+    <line x1="650" y1="135" x2="650" y2="204" stroke="var(--ink-soft)" stroke-width="2" marker-end="url(#arrow-fr)" />
+    <!-- Drop lines to Row 2 -->
+    <line x1="150" y1="265" x2="150" y2="294" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#arrow-fr)" />
+    <line x1="400" y1="265" x2="400" y2="294" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#arrow-fr)" />
+    <line x1="650" y1="265" x2="650" y2="294" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#arrow-fr)" />
+    <!-- Row 1 Cards -->
+    <rect x="40" y="205" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="150" y="228" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-cli</text>
+    <text x="150" y="248" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">Terminal &amp; CI/CD</text>
+    <rect x="290" y="205" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="400" y="228" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-wasm</text>
+    <text x="400" y="248" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">WebAssembly Navigateur</text>
+    <rect x="540" y="205" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="650" y="228" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-mcp</text>
+    <text x="650" y="248" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">JSON-RPC Agents IA</text>
+    <!-- Row 2 Cards -->
+    <rect x="40" y="295" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="150" y="318" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-lsp</text>
+    <text x="150" y="338" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">Serveur de Langage IDE</text>
+    <rect x="290" y="295" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="400" y="318" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-json</text>
+    <text x="400" y="338" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">Convertisseur JSON</text>
+    <rect x="540" y="295" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="650" y="318" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">xmlschema</text>
+    <text x="650" y="338" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">Validation XSD W3C</text>
+  </svg>
+  <figcaption class="diagram-caption">Figure 1 : Architecture modulaire partageant le cœur sécurisé zéro-unsafe.</figcaption>
+  <details class="diagram-details"><summary>Voir le code Mermaid</summary><pre class="highlight language-mermaid"><code class="language-mermaid">graph TD
   subgraph Core["Cœur Sécurisé"]
-    OXML["oxml<br/>(Analyseur, DOM, XPath 1.0)"]
+    OXML["oxml&lt;br/&gt;(Analyseur, DOM, XPath 1.0)"]
   end
-  subgraph Toolchain["Intégrations & Outils"]
-    CLI["oxml-cli<br/>(Terminal & CI/CD)"]
-    WASM["oxml-wasm<br/>(WebAssembly Navigateur)"]
-    MCP["oxml-mcp<br/>(JSON-RPC Agents IA)"]
-    LSP["oxml-lsp<br/>(Serveur de Langage IDE)"]
-    JSON["oxml-json<br/>(Convertisseur JSON)"]
-    XSD["xmlschema<br/>(Validation XSD W3C)"]
+  subgraph Toolchain["Intégrations &amp; Outils"]
+    CLI["oxml-cli&lt;br/&gt;(Terminal &amp; CI/CD)"]
+    WASM["oxml-wasm&lt;br/&gt;(WebAssembly Navigateur)"]
+    MCP["oxml-mcp&lt;br/&gt;(JSON-RPC Agents IA)"]
+    LSP["oxml-lsp&lt;br/&gt;(Serveur de Langage IDE)"]
+    JSON["oxml-json&lt;br/&gt;(Convertisseur JSON)"]
+    XSD["xmlschema&lt;br/&gt;(Validation XSD W3C)"]
   end
-  OXML --> CLI
-  OXML --> WASM
-  OXML --> MCP
-  OXML --> LSP
-  OXML --> JSON
-  OXML --> XSD
-```
+  OXML --&gt; CLI
+  OXML --&gt; WASM
+  OXML --&gt; MCP
+  OXML --&gt; LSP
+  OXML --&gt; JSON
+  OXML --&gt; XSD</code></pre></details>
+</figure>
 
 ## Emprunt en Flux Zéro-Copie
 
@@ -148,16 +197,70 @@ Pour les flux de données à très haut débit nécessitant l'élimination des a
 - Nœuds de texte, noms de balises et attributs sont inspectés sans duplication sur le tas.
 - Garantit une empreinte mémoire bornée à 34 Ko lors de l'ingestion de flux de plusieurs gigaoctets.
 
-```mermaid
-sequenceDiagram
+<figure class="diagram-card">
+  <svg viewBox="0 0 800 370" width="800" height="370" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="arch-diag2-fr-title arch-diag2-fr-desc">
+    <title id="arch-diag2-fr-title">Diagramme de Séquence de l'Emprunt en Flux Zéro-Copie</title>
+    <desc id="arch-diag2-fr-desc">Diagramme de séquence illustrant le flux zéro-copie : le flux d'entrée remplit un tampon circulaire de 34 Ko, BorrowedEvent emprunte une tranche &amp;str sans allocation sur le tas, la logique applicative l'inspecte, puis le pointeur du tampon avance.</desc>
+    <defs>
+      <marker id="seq-arrow-fr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)" />
+      </marker>
+      <marker id="ret-arrow-fr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-muted)" />
+      </marker>
+    </defs>
+    <!-- Lifelines -->
+    <line x1="110" y1="70" x2="110" y2="300" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <line x1="300" y1="70" x2="300" y2="300" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <line x1="500" y1="70" x2="500" y2="300" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <line x1="690" y1="70" x2="690" y2="300" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <!-- Participant Boxes -->
+    <rect x="25" y="20" width="170" height="50" rx="8" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="110" y="42" font-family="var(--sans)" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle">Flux d'Entrée</text>
+    <text x="110" y="58" font-family="var(--mono)" font-size="11" fill="var(--ink-muted)" text-anchor="middle">Fichier/Socket Multi-Go</text>
+    <rect x="215" y="20" width="170" height="50" rx="8" fill="var(--surface-soft)" stroke="var(--accent)" stroke-width="1.5" />
+    <text x="300" y="42" font-family="var(--sans)" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle">Tampon Circulaire</text>
+    <text x="300" y="58" font-family="var(--mono)" font-size="11" fill="var(--accent)" text-anchor="middle">Plafond Fixe 34 Ko</text>
+    <rect x="415" y="20" width="170" height="50" rx="8" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="500" y="42" font-family="var(--mono)" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle">BorrowedEvent&lt;&apos;a&gt;</text>
+    <text x="500" y="58" font-family="var(--sans)" font-size="11" fill="var(--ink-muted)" text-anchor="middle">Tranche Directe &amp;str</text>
+    <rect x="605" y="20" width="170" height="50" rx="8" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="690" y="42" font-family="var(--sans)" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle">Application</text>
+    <text x="690" y="58" font-family="var(--sans)" font-size="11" fill="var(--ink-muted)" text-anchor="middle">Logique Métier</text>
+    <!-- Step 1: Stream -> Ring Buffer -->
+    <circle cx="110" cy="115" r="10" fill="var(--accent)" />
+    <text x="110" y="119" font-family="var(--sans)" font-size="11" font-weight="700" fill="var(--accent-ink)" text-anchor="middle">1</text>
+    <line x1="125" y1="115" x2="294" y2="115" stroke="var(--accent)" stroke-width="2" marker-end="url(#seq-arrow-fr)" />
+    <text x="210" y="107" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">Remplissage du bloc interne (E/S)</text>
+    <!-- Step 2: Ring Buffer -> BorrowedEvent -->
+    <circle cx="300" cy="165" r="10" fill="var(--accent)" />
+    <text x="300" y="169" font-family="var(--sans)" font-size="11" font-weight="700" fill="var(--accent-ink)" text-anchor="middle">2</text>
+    <line x1="315" y1="165" x2="494" y2="165" stroke="var(--accent)" stroke-width="2" marker-end="url(#seq-arrow-fr)" />
+    <text x="405" y="157" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">Emprunt de tranche (&amp;str, 0 allocation)</text>
+    <!-- Step 3: BorrowedEvent -> Application -->
+    <circle cx="500" cy="215" r="10" fill="var(--accent)" />
+    <text x="500" y="219" font-family="var(--sans)" font-size="11" font-weight="700" fill="var(--accent-ink)" text-anchor="middle">3</text>
+    <line x1="515" y1="215" x2="684" y2="215" stroke="var(--accent)" stroke-width="2" marker-end="url(#seq-arrow-fr)" />
+    <text x="600" y="207" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">Inspection Balise / Attribut / Texte</text>
+    <!-- Step 4: Application -> Ring Buffer (Advance) -->
+    <circle cx="690" cy="265" r="10" fill="var(--ink-muted)" />
+    <text x="690" y="269" font-family="var(--sans)" font-size="11" font-weight="700" fill="var(--bg)" text-anchor="middle">4</text>
+    <line x1="675" y1="265" x2="306" y2="265" stroke="var(--ink-muted)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#ret-arrow-fr)" />
+    <text x="490" y="257" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink-muted)" text-anchor="middle">Libération de la tranche &amp; avance du pointeur</text>
+    <!-- Memory Cap Banner -->
+    <rect x="180" y="315" width="440" height="34" rx="6" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="400" y="337" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">Zéro Allocation sur le Tas · Empreinte Mémoire Bornée à 34 Ko</text>
+  </svg>
+  <figcaption class="diagram-caption">Figure 2 : Séquence d'emprunt en flux continu avec tampon borné à 34 Ko.</figcaption>
+  <details class="diagram-details"><summary>Voir le code Mermaid</summary><pre class="highlight language-mermaid"><code class="language-mermaid">sequenceDiagram
   autonumber
   participant Stream as Flux d'Entrée (Multi-Go)
   participant Ring as Tampon Circulaire 34 Ko
-  participant Event as BorrowedEvent (&str)
+  participant Event as BorrowedEvent (&amp;str)
   participant App as Logique Applicative
-  Stream->>Ring: Remplissage du bloc interne
-  Ring->>Event: Emprunt de tranche sans allocation
-  Event->>App: Inspection Balise / Attribut / Texte
-  App-->>Ring: Libération de la tranche & avance du pointeur
-```
+  Stream-&gt;&gt;Ring: Remplissage du bloc interne
+  Ring-&gt;&gt;Event: Emprunt de tranche sans allocation
+  Event-&gt;&gt;App: Inspection Balise / Attribut / Texte
+  App--&gt;&gt;Ring: Libération de la tranche &amp; avance du pointeur</code></pre></details>
+</figure>
 

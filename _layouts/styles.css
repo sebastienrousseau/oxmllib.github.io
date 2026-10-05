@@ -836,11 +836,40 @@ html.no-js .tab-list {
   background: var(--surface);
   text-align: center;
 }
+.diagram-card svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
 .diagram-caption {
   font-size: 0.875rem;
   color: var(--ink-muted);
   margin-top: 1rem;
   font-style: italic;
+}
+.diagram-details {
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+  text-align: left;
+}
+.diagram-details summary {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.diagram-details summary:hover {
+  color: var(--accent);
+}
+.diagram-details summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.diagram-details pre {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }
 
 /* ---------- documentation layout (USWDS documentation page) ---------- */
