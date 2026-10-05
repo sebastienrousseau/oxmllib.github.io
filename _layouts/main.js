@@ -120,4 +120,66 @@
   mode.addEventListener("click", function () {
     apply(order[(order.indexOf(current()) + 1) % order.length]);
   });
+
+  /* ---- Tablist switcher (WCAG 2.2 keyboard accessible) ---- */
+  function initTabs() {
+    var tablists = document.querySelectorAll('[role="tablist"]');
+    tablists.forEach(function (tablist) {
+      var tabs = Array.prototype.slice.call(tablist.querySelectorAll('[role="tab"]'));
+      tabs.forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          activateTab(tab, tabs);
+        });
+        tab.addEventListener("keydown", function (e) {
+          var index = tabs.indexOf(tab);
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            var next = tabs[(index + 1) % tabs.length];
+            next.focus();
+            activateTab(next, tabs);
+          } else if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            var prev = tabs[(index - 1 + tabs.length) % tabs.length];
+            prev.focus();
+            activateTab(prev, tabs);
+          } else if (e.key === "Home") {
+            e.preventDefault();
+            tabs[0].focus();
+            activateTab(tabs[0], tabs);
+          } else if (e.key === "End") {
+            e.preventDefault();
+            tabs[tabs.length - 1].focus();
+            activateTab(tabs[tabs.length - 1], tabs);
+          }
+        });
+      });
+    });
+  }
+
+  function activateTab(activeTab, allTabs) {
+    allTabs.forEach(function (t) {
+      t.setAttribute("aria-selected", "false");
+      t.setAttribute("tabindex", "-1");
+      var panelId = t.getAttribute("aria-controls");
+      if (panelId) {
+        var panel = document.getElementById(panelId);
+        if (panel) {
+          panel.setAttribute("hidden", "hidden");
+          panel.classList.remove("is-active");
+        }
+      }
+    });
+    activeTab.setAttribute("aria-selected", "true");
+    activeTab.removeAttribute("tabindex");
+    var activePanelId = activeTab.getAttribute("aria-controls");
+    if (activePanelId) {
+      var activePanel = document.getElementById(activePanelId);
+      if (activePanel) {
+        activePanel.removeAttribute("hidden");
+        activePanel.classList.add("is-active");
+      }
+    }
+  }
+
+  initTabs();
 })();

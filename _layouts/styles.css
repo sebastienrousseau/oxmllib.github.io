@@ -329,6 +329,69 @@ a:hover { color: var(--accent-hover); }
 .snippet-body { margin: 0; padding: 1.1rem; overflow-x: auto; background: var(--surface); }
 .snippet-body code { font-family: var(--mono); font-size: 0.875rem; color: var(--ink); white-space: pre; }
 
+.code-tabs {
+  margin-top: 1.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--surface);
+}
+.tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.4rem 0.5rem 0;
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--line);
+  list-style: none;
+  margin: 0;
+}
+.tab-btn {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--r) var(--r) 0 0;
+  color: var(--ink-soft);
+  font-family: var(--font);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.55rem 0.9rem;
+  min-height: 40px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  bottom: -1px;
+}
+.tab-btn:hover {
+  color: var(--ink);
+  background: var(--surface);
+}
+.tab-btn[aria-selected="true"] {
+  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--line);
+  border-bottom-color: var(--surface);
+  font-weight: 700;
+}
+.tab-btn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+.tab-panel {
+  display: none;
+}
+.tab-panel.is-active,
+.tab-panel:not([hidden]) {
+  display: block;
+}
+html.no-js .tab-panel {
+  display: block !important;
+}
+html.no-js .tab-list {
+  display: none;
+}
+
 .cards { display: grid; gap: var(--gap); margin-top: 2rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
 .card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); padding: 1.4rem; }
 .card-h { font-size: 1.0625rem; margin-bottom: 0.5rem; }

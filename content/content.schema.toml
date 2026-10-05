@@ -199,6 +199,16 @@ type = "string"
 required = false
 
 [[schemas.fields]]
+name = "nav_migrate_lxml"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_migrate_roxmltree"
+type = "string"
+required = false
+
+[[schemas.fields]]
 name = "schema"
 type = "string"
 required = true

@@ -19,9 +19,25 @@
   <div class="lu-shell">
     <h2 id="start-h" class="band-h">{{start_h}}</h2>
     <p class="band-lead">{{start_lead}}</p>
-    <div class="snippet">
-      <p class="snippet-h" id="snippet-cap">{{snippet_caption}}</p>
-      <pre class="snippet-body" tabindex="0" role="group" aria-labelledby="snippet-cap"><code>{{snippet_code}}</code></pre>
+    <div class="code-tabs">
+      <div class="tab-list" role="tablist" aria-label="{{tabs_label}}">
+        <button class="tab-btn" type="button" role="tab" id="tab-rust" aria-selected="true" aria-controls="panel-rust">{{tab_rust}}</button>
+        <button class="tab-btn" type="button" role="tab" id="tab-cli" aria-selected="false" tabindex="-1" aria-controls="panel-cli">{{tab_cli}}</button>
+        <button class="tab-btn" type="button" role="tab" id="tab-mcp" aria-selected="false" tabindex="-1" aria-controls="panel-mcp">{{tab_mcp}}</button>
+        <button class="tab-btn" type="button" role="tab" id="tab-wasm" aria-selected="false" tabindex="-1" aria-controls="panel-wasm">{{tab_wasm}}</button>
+      </div>
+      <div class="tab-panel is-active" id="panel-rust" role="tabpanel" tabindex="0" aria-labelledby="tab-rust">
+        <pre class="snippet-body"><code>{{code_rust}}</code></pre>
+      </div>
+      <div class="tab-panel" id="panel-cli" role="tabpanel" tabindex="0" aria-labelledby="tab-cli" hidden>
+        <pre class="snippet-body"><code>{{code_cli}}</code></pre>
+      </div>
+      <div class="tab-panel" id="panel-mcp" role="tabpanel" tabindex="0" aria-labelledby="tab-mcp" hidden>
+        <pre class="snippet-body"><code>{{code_mcp}}</code></pre>
+      </div>
+      <div class="tab-panel" id="panel-wasm" role="tabpanel" tabindex="0" aria-labelledby="tab-wasm" hidden>
+        <pre class="snippet-body"><code>{{code_wasm}}</code></pre>
+      </div>
     </div>
   </div>
 </section>
