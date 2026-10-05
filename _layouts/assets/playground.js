@@ -112,11 +112,32 @@ async function bootstrap() {
 
   if (!statusEl || !xmlArea) return;
 
+  async function loadWasmWithRetry(maxAttempts = 3) {
+    const wasmUrl = new URL('./wasm/oxml_wasm_bg.wasm', import.meta.url);
+    let lastError = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const resp = await fetch(wasmUrl);
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status} (${resp.statusText || 'Service Temporarily Unavailable'})`);
+        }
+        const bytes = await resp.arrayBuffer();
+        await initWasm({ module_or_path: bytes });
+        return;
+      } catch (e) {
+        lastError = e;
+        if (attempt < maxAttempts) {
+          statusEl.textContent = `Retrying engine load (attempt ${attempt + 1}/${maxAttempts})...`;
+          await new Promise((r) => setTimeout(r, attempt * 400));
+        }
+      }
+    }
+    throw lastError;
+  }
+
   try {
     statusEl.textContent = 'Loading oxml-wasm WebAssembly binary...';
-    // Determine the base URL dynamically from the script location
-    const wasmUrl = new URL('./wasm/oxml_wasm_bg.wasm', import.meta.url);
-    await initWasm(wasmUrl);
+    await loadWasmWithRetry(3);
     wasmReady = true;
     statusEl.textContent = 'oxml-wasm 0.0.10 engine active (#![forbid(unsafe_code)])';
     statusEl.className = 'status-tag status-success';
@@ -124,7 +145,21 @@ async function bootstrap() {
     statusEl.textContent = 'WASM initialization failed: ' + (err.message || err);
     statusEl.className = 'status-tag status-error';
     if (outputEl) {
-      outputEl.textContent = 'Error loading WebAssembly module:\n' + (err.stack || err);
+      outputEl.textContent = 'Error loading WebAssembly module:\n' + (err.stack || err) + '\n\nPlease check your network connection or click below to retry.';
+    }
+    // Add retry button if not present
+    if (!document.getElementById('btn-retry-wasm')) {
+      const retryBtn = document.createElement('button');
+      retryBtn.type = 'button';
+      retryBtn.id = 'btn-retry-wasm';
+      retryBtn.className = 'playground-btn btn-primary';
+      retryBtn.style.marginTop = '0.5rem';
+      retryBtn.textContent = 'Retry Engine Load';
+      retryBtn.addEventListener('click', () => {
+        retryBtn.remove();
+        bootstrap();
+      });
+      statusEl.parentNode.appendChild(retryBtn);
     }
     return;
   }

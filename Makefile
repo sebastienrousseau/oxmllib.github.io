@@ -19,6 +19,8 @@ build:
 	@touch public/.nojekyll
 	@# Publish highlight.css at root
 	@hl=$$(find public -maxdepth 2 -name 'highlight.*.css' -print -quit); [ -n "$$hl" ] && cp -f "$$hl" public/highlight.css || true
+	@# Ensure edge headers allow wasm instantiation
+	@if [ -f public/_headers ]; then sed -i.bak "s/script-src 'self'/script-src 'self' 'wasm-unsafe-eval'/g" public/_headers && rm -f public/_headers.bak; fi
 
 serve: build
 	ssg dev --config ssg.toml
