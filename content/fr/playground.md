@@ -124,6 +124,9 @@ screenshot_alt: "Le studio interactif WebAssembly oxml évaluant des requêtes X
 <option value="svg">Exemple : Graphique vectoriel SVG</option>
 <option value="pain001">Exemple : Virement financier ISO 20022 (pain.001)</option>
 <option value="pom">Exemple : Modèle de projet Maven (Hiérarchie profonde)</option>
+<option value="soap">Exemple : Enveloppe de service web SOAP 1.2</option>
+<option value="sitemap">Exemple : Plan de site XML pour moteurs de recherche</option>
+<option value="xhtml">Exemple : Document XHTML 1.0 Strict</option>
 </select>
 
 <label class="visually-hidden" for="scenario-select">Injecter un scénario d'erreur</label>
@@ -133,10 +136,13 @@ screenshot_alt: "Le studio interactif WebAssembly oxml évaluant des requêtes X
 <option value="ampersand">Erreur : Entité &amp; non échappée (AT&amp;T)</option>
 <option value="root_mismatch">Erreur : Incompatibilité de balise racine (&lt;root&gt;...&lt;/catalog&gt;)</option>
 <option value="unquoted_attr">Erreur : Valeur d'attribut non entourée de guillemets (id=b101)</option>
+<option value="undeclared_ns">Erreur : Préfixe d'espace de noms non déclaré (&lt;atom:entry&gt;)</option>
+<option value="misnested">Erreur : Chevauchement de balises incorrect (&lt;a&gt;&lt;b&gt;&lt;/a&gt;&lt;/b&gt;)</option>
 </select>
 
 <button type="button" id="paste-btn" class="pill pill-ghost">Coller XML</button>
 <button type="button" id="clear-btn" class="pill pill-ghost">Effacer</button>
+<button type="button" id="share-btn" class="pill pill-primary">Partager le lien</button>
 </div>
 
 <div class="playground-field">
@@ -241,6 +247,17 @@ screenshot_alt: "Le studio interactif WebAssembly oxml évaluant des requêtes X
 <p id="error-text">Erreur de syntaxe détectée dans le document XML.</p>
 </div>
 
+<div id="diag-container" hidden></div>
+
+<!-- Terminal CLI Command Equivalent Generator -->
+<div class="cli-preview-box" id="cli-box" aria-label="Équivalent commande terminal">
+<div class="cli-preview-header">
+<span class="cli-preview-title">Équivalent CLI (Terminal &amp; CI/CD)</span>
+<button type="button" id="copy-cli-btn" class="pill pill-ghost" style="min-height:30px;padding:0.25rem 0.75rem;font-size:0.75rem;">Copier la commande</button>
+</div>
+<pre class="cli-code"><code id="cli-cmd-output">oxml query "//book[price &lt; 30]/title" input.xml</code></pre>
+</div>
+
 <div class="output-tab-list" role="tablist" aria-label="Modes de visualisation des résultats">
 <button type="button" id="tab-matches" class="output-tab-btn" role="tab" aria-selected="true" aria-controls="output-view">Résultats XPath</button>
 <button type="button" id="tab-formatted" class="output-tab-btn" role="tab" aria-selected="false" aria-controls="output-view">XML Formaté</button>
@@ -254,6 +271,10 @@ screenshot_alt: "Le studio interactif WebAssembly oxml évaluant des requêtes X
 <button type="button" id="copy-btn" class="pill pill-primary">Copier le Résultat</button>
 <button type="button" id="download-xml-btn" class="pill pill-ghost">Télécharger .xml</button>
 <button type="button" id="download-out-btn" class="pill pill-ghost">Télécharger le Résultat</button>
+</div>
+
+<div id="share-toast" class="share-toast" hidden role="status" aria-live="polite">
+<span>✓ Lien copié dans le presse-papiers ! (État complet inclus)</span>
 </div>
 </div>
 </div>

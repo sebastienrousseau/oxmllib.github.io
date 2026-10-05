@@ -150,6 +150,69 @@ const SAMPLES = {
     </dependency>
   </dependencies>
 </project>`
+  },
+  soap: {
+    name: 'SOAP 1.2 Web Service Envelope (Namespaces & Body)',
+    xpath: '//soap:Body//m:GetStockPrice/m:StockName/text()',
+    ns: 'soap=http://www.w3.org/2003/05/soap-envelope, m=https://api.example.com/finance',
+    xml: `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+               xmlns:m="https://api.example.com/finance">
+  <soap:Header>
+    <m:AuthToken>sec-token-99824</m:AuthToken>
+  </soap:Header>
+  <soap:Body>
+    <m:GetStockPrice>
+      <m:StockName>OXMT</m:StockName>
+      <m:Currency>USD</m:Currency>
+    </m:GetStockPrice>
+  </soap:Body>
+</soap:Envelope>`
+  },
+  sitemap: {
+    name: 'Search Engine XML Sitemap (URL Priority Filters)',
+    xpath: '//s:url[s:priority >= 0.8]/s:loc/text()',
+    ns: 's=http://www.sitemaps.org/schemas/sitemap/0.9',
+    xml: `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://oxmllib.com/</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://oxmllib.com/playground/</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oxmllib.com/architecture/</loc>
+    <lastmod>2026-10-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>`
+  },
+  xhtml: {
+    name: 'XHTML 1.0 Strict Document (Web Semantics)',
+    xpath: '//h:article//h:h2/text()',
+    ns: 'h=http://www.w3.org/1999/xhtml',
+    xml: `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>Rust Memory Safety</title>
+  </head>
+  <body>
+    <article id="main-content">
+      <h2>Zero Unsafe Guarantees</h2>
+      <p>The parser prevents buffer overruns at compile time.</p>
+    </article>
+  </body>
+</html>`
   }
 };
 
@@ -184,6 +247,25 @@ const ERROR_SCENARIOS = {
 <library>
   <book id=b101>Rust Systems</book>
 </library>`
+  },
+  undeclared_ns: {
+    name: 'Undeclared namespace prefix (<atom:entry>)',
+    xml: `<?xml version="1.0" encoding="UTF-8"?>
+<feed>
+  <title>Developer News</title>
+  <atom:entry>
+    <atom:title>Missing XMLNS declaration</atom:title>
+  </atom:entry>
+</feed>`
+  },
+  misnested: {
+    name: 'Misnested tag overlap (<a><b></a></b>)',
+    xml: `<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <paragraph>
+    <bold>This is <italic>improperly</bold> nested</italic> text.
+  </paragraph>
+</document>`
   }
 };
 
@@ -231,6 +313,11 @@ async function bootstrap() {
   const tabFormatted = document.getElementById('tab-formatted');
   const tabStats = document.getElementById('tab-stats');
   const tabJson = document.getElementById('tab-json');
+
+  // Share & CLI elements
+  const shareBtn = document.getElementById('share-btn');
+  const shareToast = document.getElementById('share-toast');
+  const copyCliBtn = document.getElementById('copy-cli-btn');
 
   if (!statusEl || !xmlArea) return;
 
@@ -449,6 +536,122 @@ async function bootstrap() {
     }
   }
 
+  function updateCliCommand() {
+    const cliOutput = document.getElementById('cli-cmd-output');
+    if (!cliOutput) return;
+    const xpath = xpathInput.value.trim() || '/*';
+    const nsStr = nsInput.value.trim();
+
+    let cmd = '';
+    if (currentOutputTab === 'formatted') {
+      cmd = 'oxml format --indent 2 document.xml';
+    } else if (currentOutputTab === 'stats') {
+      cmd = 'oxml inspect document.xml';
+    } else if (currentOutputTab === 'json') {
+      cmd = 'oxml convert --to json document.xml';
+    } else {
+      let nsArgs = '';
+      if (nsStr) {
+        const parts = nsStr.split(',').map((s) => s.trim()).filter(Boolean);
+        nsArgs = parts.map((p) => `-N ${p}`).join(' ') + ' ';
+      }
+      cmd = `oxml query ${nsArgs}"${xpath}" document.xml`;
+    }
+    cliOutput.textContent = cmd;
+  }
+
+  function buildDiagnosticReport(errMsg, xml) {
+    const diagContainer = document.getElementById('diag-container');
+    if (!diagContainer) return;
+
+    let line = null;
+    let col = null;
+    const lineMatch = errMsg.match(/line\s*(\d+)/i) || errMsg.match(/at\s+(\d+):(\d+)/);
+    const colMatch = errMsg.match(/col(?:umn)?\s*(\d+)/i);
+
+    if (lineMatch) {
+      line = parseInt(lineMatch[1], 10);
+      if (lineMatch[2]) col = parseInt(lineMatch[2], 10);
+    }
+    if (!col && colMatch) {
+      col = parseInt(colMatch[1], 10);
+    }
+
+    if (!line) {
+      const posMatch = errMsg.match(/position\s*(\d+)/i) || errMsg.match(/offset\s*(\d+)/i);
+      if (posMatch) {
+        const offset = parseInt(posMatch[1], 10);
+        const sub = xml.slice(0, offset);
+        const lines = sub.split('\n');
+        line = lines.length;
+        col = lines[lines.length - 1].length + 1;
+      }
+    }
+
+    let category = 'XML 1.0 Syntax';
+    let remediation = 'Verify that all tags are closed in reverse order of opening and special characters (&, <) are escaped as &amp; and &lt;.';
+
+    if (/xpath/i.test(errMsg)) {
+      category = 'XPath 1.0 Expression';
+      remediation = 'Verify axis step syntax, closing square brackets on predicates, and valid standard function names (count, contains, starts-with).';
+    } else if (/namespace/i.test(errMsg)) {
+      category = 'XML Namespace';
+      remediation = 'Ensure the namespace prefix is declared via xmlns:prefix="..." on the element or an ancestor.';
+    } else if (/unclosed/i.test(errMsg) || /closing tag/i.test(errMsg)) {
+      category = 'Tag Closure Mismatch';
+      remediation = 'Check for missing closing tags or tags closed out of order.';
+    } else if (/quote|attribute/i.test(errMsg)) {
+      category = 'Attribute Syntax';
+      remediation = 'Attribute values must be enclosed in single or double quotes (e.g. id="value").';
+    }
+
+    let snippetHtml = '';
+    if (line && xml) {
+      const allLines = xml.split('\n');
+      const start = Math.max(0, line - 2);
+      const end = Math.min(allLines.length, line + 1);
+      const linesOut = [];
+      for (let i = start; i < end; i++) {
+        const lineNum = i + 1;
+        const lineContent = allLines[i] || '';
+        const escaped = lineContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        if (lineNum === line) {
+          linesOut.push(`<span class="diag-highlight"><span class="diag-line-num">${lineNum}:</span>${escaped}</span>`);
+          if (col && col > 0) {
+            const pad = ' '.repeat(String(lineNum).length + 2 + Math.max(0, col - 1));
+            linesOut.push(`<span class="diag-pointer">${pad}^ ${errMsg}</span>`);
+          }
+        } else {
+          linesOut.push(`<span><span class="diag-line-num">${lineNum}:</span>${escaped}</span>`);
+        }
+      }
+      snippetHtml = `<div class="diag-snippet">${linesOut.join('\n')}</div>`;
+    }
+
+    diagContainer.innerHTML = `
+      <div class="diag-card" role="alert" aria-live="assertive">
+        <div class="diag-header">
+          <span class="diag-title">
+            <span>⚠ Parser Failure Diagnostics</span>
+            <span class="diag-badge">${category}</span>
+          </span>
+          <span class="field-hint">${line ? `Line ${line}${col ? `, Col ${col}` : ''}` : 'Location detected'}</span>
+        </div>
+        <div class="diag-body">
+          <table class="diag-table">
+            <tbody>
+              <tr><th scope="row">Error Description</th><td>${errMsg}</td></tr>
+              ${line ? `<tr><th scope="row">Line / Column</th><td>Line ${line}, Column ${col || 1}</td></tr>` : ''}
+              <tr><th scope="row">Suggested Remediation</th><td>${remediation}</td></tr>
+            </tbody>
+          </table>
+          ${snippetHtml}
+        </div>
+      </div>
+    `;
+    diagContainer.hidden = false;
+  }
+
   function runEvaluation() {
     if (!wasmReady) return;
     const xml = xmlArea.value;
@@ -463,8 +666,10 @@ async function bootstrap() {
       currentDoc = parse(xml);
       const parseTime = performance.now() - t0;
 
-      // Hide error alert
+      // Hide error alert and diagnostics
       if (errorBanner) errorBanner.hidden = true;
+      const diagContainer = document.getElementById('diag-container');
+      if (diagContainer) diagContainer.hidden = true;
 
       // Update telemetry
       statRoot.textContent = currentDoc.rootName() || '(none)';
@@ -508,6 +713,7 @@ async function bootstrap() {
       }
 
       renderOutput();
+      updateCliCommand();
     } catch (err) {
       statTime.textContent = (performance.now() - t0).toFixed(2) + ' ms';
       statMatches.textContent = 'Error';
@@ -520,7 +726,9 @@ async function bootstrap() {
         errorBanner.hidden = false;
         errorText.textContent = err.message || err;
       }
-      outputEl.textContent = `Parser / XPath Diagnostics Error:\n\n${err.message || err}\n\nReview the document around the indicated location or click 'Fix it' if available.`;
+      buildDiagnosticReport(err.message || String(err), xml);
+      updateCliCommand();
+      outputEl.textContent = `Parser / XPath Diagnostics Error:\n\n${err.message || err}\n\nReview the detailed diagnostic card above for line, column, and remediation hints.`;
     }
   }
 
@@ -599,6 +807,7 @@ async function bootstrap() {
         currentOutputTab = id;
         updateTabButtons();
         renderOutput();
+        updateCliCommand();
       });
     }
   });
@@ -778,10 +987,113 @@ async function bootstrap() {
     }
   });
 
+  function encodeState(obj) {
+    const json = JSON.stringify(obj);
+    const bytes = new TextEncoder().encode(json);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function decodeState(str) {
+    let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const json = new TextDecoder().decode(bytes);
+    return JSON.parse(json);
+  }
+
+  function saveStateToHash() {
+    try {
+      const state = {
+        x: xmlArea.value,
+        q: xpathInput.value,
+        n: nsInput.value,
+        t: currentOutputTab
+      };
+      const encoded = encodeState(state);
+      window.location.hash = 'state=' + encoded;
+      return window.location.href;
+    } catch (e) {
+      console.error('Failed to encode state', e);
+      return window.location.href;
+    }
+  }
+
+  function loadStateFromHash() {
+    try {
+      const hash = window.location.hash;
+      if (!hash || !hash.includes('state=')) return false;
+      const match = hash.match(/state=([^&]+)/);
+      if (!match) return false;
+      const data = decodeState(match[1]);
+      if (data && typeof data.x === 'string') {
+        xmlArea.value = data.x;
+        xpathInput.value = data.q || '';
+        nsInput.value = data.n || '';
+        if (data.t && ['matches', 'formatted', 'stats', 'json'].includes(data.t)) {
+          currentOutputTab = data.t;
+          updateTabButtons();
+        }
+        updateCharCount();
+        return true;
+      }
+    } catch (e) {
+      console.warn('Failed to restore state from hash:', e);
+    }
+    return false;
+  }
+
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const url = saveStateToHash();
+      try {
+        await navigator.clipboard.writeText(url);
+        if (shareToast) {
+          shareToast.classList.add('visible');
+          setTimeout(() => { shareToast.classList.remove('visible'); }, 2500);
+        }
+      } catch {
+        prompt('Copy playground URL:', url);
+      }
+    });
+  }
+
+  if (copyCliBtn) {
+    copyCliBtn.addEventListener('click', async () => {
+      const cliOutput = document.getElementById('cli-cmd-output');
+      if (!cliOutput) return;
+      try {
+        await navigator.clipboard.writeText(cliOutput.textContent);
+        const orig = copyCliBtn.textContent;
+        copyCliBtn.textContent = 'Copied!';
+        setTimeout(() => { copyCliBtn.textContent = orig; }, 1500);
+      } catch (e) {
+        console.error('Failed to copy CLI command:', e);
+      }
+    });
+  }
+
+  xmlArea.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      xmlArea.blur();
+    }
+  });
+
   xmlArea.addEventListener('input', updateCharCount);
 
-  // Initialize with books sample
-  setSample('books');
+  // Initialize with URL state if present, otherwise default to books sample
+  if (loadStateFromHash()) {
+    runEvaluation();
+  } else {
+    setSample('books');
+  }
 }
 
 if (document.readyState === 'loading') {

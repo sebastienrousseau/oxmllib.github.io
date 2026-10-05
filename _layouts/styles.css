@@ -720,7 +720,7 @@ html.no-js .tab-list {
   color: var(--ink);
 }
 
-/* Error Diagnostic Alert */
+/* Error Diagnostic Alert & Card (pain001 style) */
 .error-banner {
   background: var(--surface-soft);
   border-inline-start: 4px solid var(--line);
@@ -738,6 +738,144 @@ html.no-js .tab-list {
   margin: 0;
   font-size: 0.84375rem;
   color: var(--ink-soft);
+}
+
+.diag-card {
+  margin: 1rem 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  overflow: hidden;
+}
+.diag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--line);
+}
+.diag-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.diag-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--line);
+  color: var(--bg);
+}
+.diag-body {
+  padding: 1rem;
+}
+.diag-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  margin-bottom: 0.75rem;
+}
+.diag-table th, .diag-table td {
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.diag-table th {
+  color: var(--ink-muted);
+  width: 25%;
+  font-weight: 600;
+}
+.diag-table td {
+  color: var(--ink);
+  font-family: var(--mono);
+}
+.diag-snippet {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 0.5rem 0 0 0;
+}
+.diag-line-num {
+  color: var(--ink-muted);
+  margin-right: 0.75rem;
+  user-select: none;
+}
+.diag-highlight {
+  background: var(--surface-soft);
+  font-weight: 700;
+  color: var(--ink);
+}
+.diag-pointer {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* CLI Equivalent Generator Box */
+.cli-preview-box {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 0.85rem 1rem;
+  margin: 1.25rem 0;
+}
+.cli-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+}
+.cli-preview-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+}
+.cli-code {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow-x: auto;
+}
+.cli-code code {
+  font-family: var(--mono);
+  font-size: 0.84375rem;
+  color: var(--ink);
+  white-space: pre;
+}
+
+/* Share feedback toast */
+.share-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 /* ---------- Comparison & Feature Matrix ---------- */

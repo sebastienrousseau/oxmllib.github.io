@@ -124,6 +124,9 @@ screenshot_alt: "The oxml interactive WebAssembly studio evaluating XPath querie
 <option value="svg">Sample: SVG Vector Graphic</option>
 <option value="pain001">Sample: ISO 20022 Financial Transfer (pain.001)</option>
 <option value="pom">Sample: Maven Project Model (Deep Hierarchy)</option>
+<option value="soap">Sample: SOAP 1.2 Web Service Envelope</option>
+<option value="sitemap">Sample: Search Engine XML Sitemap</option>
+<option value="xhtml">Sample: XHTML 1.0 Strict Document</option>
 </select>
 
 <label class="visually-hidden" for="scenario-select">Introduce an error</label>
@@ -133,10 +136,13 @@ screenshot_alt: "The oxml interactive WebAssembly studio evaluating XPath querie
 <option value="ampersand">Error: Unescaped &amp; entity (AT&amp;T)</option>
 <option value="root_mismatch">Error: Root tag mismatch (&lt;root&gt;...&lt;/catalog&gt;)</option>
 <option value="unquoted_attr">Error: Unquoted attribute value (id=b101)</option>
+<option value="undeclared_ns">Error: Undeclared namespace prefix (&lt;atom:entry&gt;)</option>
+<option value="misnested">Error: Misnested tag overlap (&lt;a&gt;&lt;b&gt;&lt;/a&gt;&lt;/b&gt;)</option>
 </select>
 
 <button type="button" id="paste-btn" class="pill pill-ghost">Paste XML</button>
 <button type="button" id="clear-btn" class="pill pill-ghost">Clear</button>
+<button type="button" id="share-btn" class="pill pill-primary">Share Query Link</button>
 </div>
 
 <div class="playground-field">
@@ -241,6 +247,17 @@ screenshot_alt: "The oxml interactive WebAssembly studio evaluating XPath querie
 <p id="error-text">Syntax error detected in XML document.</p>
 </div>
 
+<div id="diag-container" hidden></div>
+
+<!-- Terminal CLI Command Equivalent Generator -->
+<div class="cli-preview-box" id="cli-box" aria-label="Terminal command equivalent">
+<div class="cli-preview-header">
+<span class="cli-preview-title">CLI Equivalent (Terminal &amp; CI/CD)</span>
+<button type="button" id="copy-cli-btn" class="pill pill-ghost" style="min-height:30px;padding:0.25rem 0.75rem;font-size:0.75rem;">Copy Command</button>
+</div>
+<pre class="cli-code"><code id="cli-cmd-output">oxml query "//book[price &lt; 30]/title" input.xml</code></pre>
+</div>
+
 <div class="output-tab-list" role="tablist" aria-label="Output view modes">
 <button type="button" id="tab-matches" class="output-tab-btn" role="tab" aria-selected="true" aria-controls="output-view">XPath Matches</button>
 <button type="button" id="tab-formatted" class="output-tab-btn" role="tab" aria-selected="false" aria-controls="output-view">Formatted XML</button>
@@ -254,6 +271,10 @@ screenshot_alt: "The oxml interactive WebAssembly studio evaluating XPath querie
 <button type="button" id="copy-btn" class="pill pill-primary">Copy Output</button>
 <button type="button" id="download-xml-btn" class="pill pill-ghost">Download .xml</button>
 <button type="button" id="download-out-btn" class="pill pill-ghost">Download Output</button>
+</div>
+
+<div id="share-toast" class="share-toast" hidden role="status" aria-live="polite">
+<span>✓ Link copied to clipboard! (Contains full state)</span>
 </div>
 </div>
 </div>
