@@ -58,6 +58,8 @@ nav_conformance: "Conformité"
 nav_a11y: "Accessibilité"
 nav_migrate_lxml: "Migration depuis lxml"
 nav_migrate_roxmltree: "Migration depuis roxmltree"
+nav_cookbook: "Livre de recettes"
+nav_playground: "Bac à sable"
 footer_note: "Boîte à outils XML en pur Rust avec zéro code unsafe, sous licences MIT ou Apache-2.0."
 copyright: "© 2026 Sebastien Rousseau. Sous licence MIT ou Apache-2.0."
 eyebrow: "Documentation"
@@ -85,6 +87,8 @@ cur_conformance: ""
 cur_a11y: ""
 cur_migrate_lxml: ""
 cur_migrate_roxmltree: ""
+cur_cookbook: ""
+cur_playground: ""
 form_origin: "https://oxmllib.com"
 screenshot_alt: "The oxml documentation website showing navigation, code examples, and architecture guides."
 ---
@@ -111,10 +115,49 @@ Toutes les vérifications de bornes sont garanties au niveau du compilateur.
 
 Le balayage rapide de délimiteurs s'appuie sur la technique SWAR (SIMD Within A Register) par blocs de 8 octets, doublant le débit sans aucune instruction unsafe.
 
+## Architecture de l'Écosystème
+
+L'écosystème `oxml` est articulé en crates découplés partageant le même cœur sécurisé :
+
+```mermaid
+graph TD
+  subgraph Core["Cœur Sécurisé"]
+    OXML["oxml<br/>(Analyseur, DOM, XPath 1.0)"]
+  end
+  subgraph Toolchain["Intégrations & Outils"]
+    CLI["oxml-cli<br/>(Terminal & CI/CD)"]
+    WASM["oxml-wasm<br/>(WebAssembly Navigateur)"]
+    MCP["oxml-mcp<br/>(JSON-RPC Agents IA)"]
+    LSP["oxml-lsp<br/>(Serveur de Langage IDE)"]
+    JSON["oxml-json<br/>(Convertisseur JSON)"]
+    XSD["xmlschema<br/>(Validation XSD W3C)"]
+  end
+  OXML --> CLI
+  OXML --> WASM
+  OXML --> MCP
+  OXML --> LSP
+  OXML --> JSON
+  OXML --> XSD
+```
+
 ## Emprunt en Flux Zéro-Copie
 
 Pour les flux de données à très haut débit nécessitant l'élimination des allocations mémoire :
 
 - `Reader::next_borrowed()` produit des événements `BorrowedEvent<'a>` qui empruntent directement les tranches de chaînes (`&str`) depuis le tampon interne.
 - Nœuds de texte, noms de balises et attributs sont inspectés sans duplication sur le tas.
-- Garantit une empreinte mémoire minimale et des performances maximales.
+- Garantit une empreinte mémoire bornée à 34 Ko lors de l'ingestion de flux de plusieurs gigaoctets.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Stream as Flux d'Entrée (Multi-Go)
+  participant Ring as Tampon Circulaire 34 Ko
+  participant Event as BorrowedEvent (&str)
+  participant App as Logique Applicative
+  Stream->>Ring: Remplissage du bloc interne
+  Ring->>Event: Emprunt de tranche sans allocation
+  Event->>App: Inspection Balise / Attribut / Texte
+  App-->>Ring: Libération de la tranche & avance du pointeur
+```
+

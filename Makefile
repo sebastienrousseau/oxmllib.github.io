@@ -12,7 +12,7 @@ build:
 	@# Copy layout assets, images, and CNAME into public/
 	@mkdir -p public/images public/assets
 	@cp -f images/*.webp images/*.png public/images/ 2>/dev/null || true
-	@cp -f _layouts/assets/* public/assets/ 2>/dev/null || true
+	@cp -Rf _layouts/assets/* public/assets/ 2>/dev/null || true
 	@cp -f _layouts/favicon.ico public/favicon.ico 2>/dev/null || true
 	@cp -f CNAME public/CNAME
 	@cp -f public/404/index.html public/404.html 2>/dev/null || true

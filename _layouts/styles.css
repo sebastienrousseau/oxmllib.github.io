@@ -402,6 +402,251 @@ html.no-js .tab-list {
 .fact-t { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
 .fact-d { color: var(--ink-soft); font-size: 0.9375rem; margin-top: 0.25rem; }
 
+
+/* ---------- Interactive WASM Playground ---------- */
+.playground-box {
+  margin: 2rem 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  padding: 1.5rem;
+}
+.playground-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.playground-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+.status-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+}
+.status-tag.status-success {
+  background: var(--accent-soft);
+  color: var(--on-accent-soft);
+  border-color: var(--accent);
+}
+.status-tag.status-error {
+  background: var(--surface-soft);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.playground-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+@media (min-width: 60rem) {
+  .playground-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.playground-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.playground-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.playground-field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.playground-field .field-hint {
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+.playground-select,
+.playground-input,
+.playground-textarea {
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 0.6rem 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+.playground-select {
+  font-family: var(--sans);
+  cursor: pointer;
+}
+.playground-textarea {
+  min-height: 220px;
+  resize: vertical;
+  line-height: 1.45;
+  tab-size: 2;
+}
+.playground-input:focus,
+.playground-textarea:focus,
+.playground-select:focus {
+  outline: 2px solid var(--focus);
+  outline-offset: -1px;
+}
+.playground-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.playground-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+}
+.playground-btn:hover {
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+.playground-btn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.playground-btn.btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.playground-btn.btn-primary:hover {
+  background: var(--accent-hover);
+}
+.playground-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+  background: var(--surface-soft);
+  padding: 0.75rem;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+}
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+.stat-val {
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.playground-output-box {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.playground-output {
+  margin: 0;
+  padding: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-y: auto;
+  min-height: 220px;
+  flex-grow: 1;
+}
+
+/* ---------- Comparison & Feature Matrix ---------- */
+.matrix-table-wrapper {
+  overflow-x: auto;
+  margin: 2rem 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+.matrix-table th,
+.matrix-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.matrix-table th {
+  background: var(--surface-soft);
+  font-weight: 700;
+  color: var(--ink);
+}
+.matrix-table tr:last-child td {
+  border-bottom: none;
+}
+.matrix-table tr:hover td {
+  background: var(--surface-soft);
+}
+.matrix-badge-pass {
+  color: var(--accent);
+  font-weight: 700;
+}
+.matrix-badge-fail {
+  color: var(--ink-muted);
+}
+
+/* ---------- Mermaid Diagram Wrapper ---------- */
+.diagram-card {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  text-align: center;
+}
+.diagram-caption {
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+  margin-top: 1rem;
+  font-style: italic;
+}
+
 /* ---------- documentation layout (USWDS documentation page) ---------- */
 .doc-shell {
   display: grid;

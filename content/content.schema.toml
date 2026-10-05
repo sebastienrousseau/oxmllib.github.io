@@ -209,6 +209,16 @@ type = "string"
 required = false
 
 [[schemas.fields]]
+name = "nav_cookbook"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_playground"
+type = "string"
+required = false
+
+[[schemas.fields]]
 name = "schema"
 type = "string"
 required = true

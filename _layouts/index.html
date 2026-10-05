@@ -67,7 +67,71 @@
   </div>
 </section>
 
-<section class="band" aria-labelledby="proof-h">
+<section class="band" aria-labelledby="matrix-h">
+  <div class="lu-shell">
+    <h2 id="matrix-h" class="band-h">{{matrix_h}}</h2>
+    <p class="band-lead">{{matrix_lead}}</p>
+    <div class="matrix-table-wrapper">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th scope="col">{{th_feature}}</th>
+            <th scope="col">{{th_oxml}}</th>
+            <th scope="col">{{th_lxml}}</th>
+            <th scope="col">{{th_xml2}}</th>
+            <th scope="col">{{th_roxmltree}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">{{feat_safety}}</th>
+            <td class="matrix-badge-pass">{{val_oxml_safety}}</td>
+            <td class="matrix-badge-fail">{{val_lxml_safety}}</td>
+            <td class="matrix-badge-fail">{{val_xml2_safety}}</td>
+            <td class="matrix-badge-pass">{{val_roxmltree_safety}}</td>
+          </tr>
+          <tr>
+            <th scope="row">{{feat_mutation}}</th>
+            <td class="matrix-badge-pass">{{val_oxml_mutation}}</td>
+            <td class="matrix-badge-pass">{{val_lxml_mutation}}</td>
+            <td class="matrix-badge-pass">{{val_xml2_mutation}}</td>
+            <td class="matrix-badge-fail">{{val_roxmltree_mutation}}</td>
+          </tr>
+          <tr>
+            <th scope="row">{{feat_xpath}}</th>
+            <td class="matrix-badge-pass">{{val_oxml_xpath}}</td>
+            <td class="matrix-badge-pass">{{val_lxml_xpath}}</td>
+            <td class="matrix-badge-pass">{{val_xml2_xpath}}</td>
+            <td class="matrix-badge-fail">{{val_roxmltree_xpath}}</td>
+          </tr>
+          <tr>
+            <th scope="row">{{feat_xsd}}</th>
+            <td class="matrix-badge-pass">{{val_oxml_xsd}}</td>
+            <td class="matrix-badge-pass">{{val_lxml_xsd}}</td>
+            <td class="matrix-badge-pass">{{val_xml2_xsd}}</td>
+            <td class="matrix-badge-fail">{{val_roxmltree_xsd}}</td>
+          </tr>
+          <tr>
+            <th scope="row">{{feat_wasm}}</th>
+            <td class="matrix-badge-pass">{{val_oxml_wasm}}</td>
+            <td class="matrix-badge-fail">{{val_lxml_wasm}}</td>
+            <td class="matrix-badge-fail">{{val_xml2_wasm}}</td>
+            <td class="matrix-badge-fail">{{val_roxmltree_wasm}}</td>
+          </tr>
+          <tr>
+            <th scope="row">{{feat_mcp}}</th>
+            <td class="matrix-badge-pass">{{val_oxml_mcp}}</td>
+            <td class="matrix-badge-fail">{{val_lxml_mcp}}</td>
+            <td class="matrix-badge-fail">{{val_xml2_mcp}}</td>
+            <td class="matrix-badge-fail">{{val_roxmltree_mcp}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="band band-soft" aria-labelledby="proof-h">
   <div class="lu-shell">
     <h2 id="proof-h" class="band-h">{{proof_h}}</h2>
     <p class="band-lead">{{proof_lead}}</p>

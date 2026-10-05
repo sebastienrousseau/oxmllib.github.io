@@ -58,6 +58,8 @@ nav_conformance: "Conformance"
 nav_a11y: "Accessibility"
 nav_migrate_lxml: "Migrating from lxml"
 nav_migrate_roxmltree: "Migrating from roxmltree"
+nav_cookbook: "Cookbook"
+nav_playground: "Playground"
 footer_note: "A pure Rust XML toolkit with zero unsafe code, published under MIT or Apache-2.0."
 copyright: "© 2026 Sebastien Rousseau. Licensed under MIT or Apache-2.0."
 eyebrow: "Documentation"
@@ -85,6 +87,8 @@ cur_conformance: ""
 cur_a11y: ""
 cur_migrate_lxml: ""
 cur_migrate_roxmltree: ""
+cur_cookbook: ""
+cur_playground: ""
 form_origin: "https://oxmllib.com"
 screenshot_alt: "The oxml documentation website showing navigation, code examples, and architecture guides."
 ---
@@ -111,10 +115,49 @@ Every boundary check is verified at compile-time or hardware-accelerated without
 
 Safe delimiter scanning uses SIMD Within A Register (SWAR) across 8-byte chunks to scan character data and attribute values, delivering over +149% throughput vs scalar scanning without unsafe intrinsics.
 
+## Ecosystem Architecture
+
+The `oxml` ecosystem is cleanly separated into specialized, decoupled crates that share the zero-unsafe core:
+
+```mermaid
+graph TD
+  subgraph Core["Core Engine"]
+    OXML["oxml<br/>(Parser, DOM, XPath 1.0)"]
+  end
+  subgraph Toolchain["Runtime Integrations & Tooling"]
+    CLI["oxml-cli<br/>(Terminal & CI/CD)"]
+    WASM["oxml-wasm<br/>(Browser WebAssembly)"]
+    MCP["oxml-mcp<br/>(AI Agent JSON-RPC)"]
+    LSP["oxml-lsp<br/>(IDE Language Server)"]
+    JSON["oxml-json<br/>(JSON/Streaming Converter)"]
+    XSD["xmlschema<br/>(W3C XSD Conformance)"]
+  end
+  OXML --> CLI
+  OXML --> WASM
+  OXML --> MCP
+  OXML --> LSP
+  OXML --> JSON
+  OXML --> XSD
+```
+
 ## Zero-Copy Streaming Borrowing
 
 For high-throughput pipelines where memory allocation overhead must be eliminated:
 
 - `Reader::next_borrowed()` yields `BorrowedEvent<'a>` items that borrow string slices directly from the internal input buffer.
 - Text nodes, tag names, and attribute values are inspected with zero heap copies.
-- Preserves full streaming memory bounds while achieving peak throughput.
+- Preserves bounded 34 KB memory usage while streaming multi-gigabyte documents at peak throughput.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Stream as Input Stream (Multi-GB)
+  participant Ring as 34 KB Ring Buffer
+  participant Event as BorrowedEvent (&str)
+  participant App as Application Logic
+  Stream->>Ring: Fill internal chunk
+  Ring->>Event: Borrow slice without heap allocation
+  Event->>App: Inspect Tag / Attribute / Text
+  App-->>Ring: Release slice & advance ring buffer pointer
+```
+
