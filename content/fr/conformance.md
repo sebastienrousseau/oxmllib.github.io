@@ -60,21 +60,24 @@ nav_migrate_lxml: "Migration depuis lxml"
 nav_migrate_roxmltree: "Migration depuis roxmltree"
 nav_cookbook: "Livre de recettes"
 nav_playground: "Bac à sable"
+nav_compare: "Comparatif des bibliothèques"
+nav_benchmarks: "Benchmarks"
+nav_security: "Sécurité"
 footer_note: "Boîte à outils XML en pur Rust avec zéro code unsafe, sous licences MIT ou Apache-2.0."
 copyright: "© 2026 Sebastien Rousseau. Sous licence MIT ou Apache-2.0."
-eyebrow: "Documentation"
-headline: "Conformité W3C & Benchmarks"
-lead: "Validé face aux suites officielles W3C XML et évalué pour le débit de streaming et d'arborescence."
-prev_href: "/fr/architecture/"
-prev_label: "Architecture"
-next_href: "/fr/accessibility/"
-next_label: "Accessibilité"
-toc_1: "Suite W3C"
-toc_1_id: "w3c"
-toc_2: "Mesures de Débit"
-toc_2_id: "benchmarks"
-toc_3: "Empreinte Mémoire"
-toc_3_id: "memory"
+eyebrow: "Standards & Vérification"
+headline: "Conformité aux standards W3C"
+lead: "Validation rigoureuse face aux suites officielles W3C XML 1.0, W3C XML Schema (XSD) et XPath 1.0 avec cliquets anti-régression continus."
+prev_href: "/fr/benchmarks/"
+prev_label: "Benchmarks"
+next_href: "/fr/security/"
+next_label: "Sécurité"
+toc_1: "Suite XML 1.0"
+toc_1_id: "xml-conformance"
+toc_2: "Suite Schéma XML (XSD)"
+toc_2_id: "xsd-conformance"
+toc_3: "Validation XPath 1.0"
+toc_3_id: "xpath-conformance"
 cur_install: ""
 cur_cli: ""
 cur_xpath: ""
@@ -89,40 +92,74 @@ cur_migrate_lxml: ""
 cur_migrate_roxmltree: ""
 cur_cookbook: ""
 cur_playground: ""
+cur_compare: ""
+cur_benchmarks: ""
+cur_security: ""
 form_origin: "https://oxmllib.com"
 screenshot_alt: "The oxml documentation website showing navigation, code examples, and architecture guides."
 ---
 
-## Suite W3C XML
+<h2 id="xml-conformance">Suite de conformité W3C XML 1.0</h2>
 
-`oxml` intègre la suite officielle de conformité W3C XML (`xmlts20130923`) dans ses tests continus :
+<p><code>oxml</code> intègre la suite officielle de conformité W3C XML (<code>xmlts20130923</code>) dans son pipeline d'intégration continue :</p>
 
-- Téléchargement et vérification automatisés des cas de test XML 1.0.
-- Validation de la syntaxe, de l'expansion d'entités et des encodages (UTF-8, UTF-16).
-- Rejet systématique des documents non conformes avec localisation précise des erreurs.
+<ul>
+  <li><strong>Conformité XML 1.0 (Cinquième Édition) :</strong> Validation des plages de caractères, décodage UTF-8/UTF-16, imbrication et substitution d'entités.</li>
+  <li><strong>Porte de bienveillance syntaxique :</strong> 100 % de réussite sur l'ensemble des documents valides et invalides du jeu principal W3C.</li>
+  <li><strong>Diagnostics déterministes :</strong> Rejet immédiat avec coordonnées précises de ligne, colonne et décalage d'octets.</li>
+</ul>
 
-## Conformité W3C XML Schema (XSD)
+<h2 id="xsd-conformance">Conformité W3C XML Schema (XSD)</h2>
 
-`xmlschema` est vérifié en continu contre la suite officielle de tests W3C XML Schema (`xsts-2007-06-20`), vérifiée par empreinte SHA-256 :
+<p><code>xmlschema</code> est vérifié en continu contre la suite officielle de tests W3C XML Schema (<code>xsts-2007-06-20</code>), figée par empreinte SHA-256 :</p>
 
-- **39 420 cas de test au total** exécutés sous CI en mode release.
-- **95,2 % de réussite** sur 35 942 tests tranchés (34 226 réussites, 1 716 échecs, 0 panique).
-- **91,2 % de couverture globale de la suite** avec cliquet anti-régression strict.
+<div class="matrix-table-wrapper">
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th scope="col">Indicateur de test</th>
+        <th scope="col">Nombre / Taux</th>
+        <th scope="col">Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Cas de test totaux</th>
+        <td>39 420 tests</td>
+        <td class="matrix-badge-pass">Exécutés en CI automatisée</td>
+      </tr>
+      <tr>
+        <th scope="row">Cas de test tranchés</th>
+        <td>35 942 tests</td>
+        <td class="matrix-badge-pass">Évalués en mode release</td>
+      </tr>
+      <tr>
+        <th scope="row">Tests réussis</th>
+        <td>34 226 réussites</td>
+        <td class="matrix-badge-pass"><strong>95,2 % de réussite</strong></td>
+      </tr>
+      <tr>
+        <th scope="row">Tests échoués</th>
+        <td>1 716 échecs</td>
+        <td>Répertoriés dans le cliquet de référence</td>
+      </tr>
+      <tr>
+        <th scope="row">Nombre de paniques</th>
+        <td><strong>0 panique</strong></td>
+        <td class="matrix-badge-pass">Exécution 100 % sécurisée</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-## Mesures de Débit
+<h2 id="xpath-conformance">Conformité à la spécification XPath 1.0</h2>
 
-Débit d'analyse de flux mesuré avec Criterion sur des jeux de données réels (10 Mo) :
+<p>Le moteur XPath d'<code>oxml</code> est validé face aux suites de spécification OASIS et W3C XPath 1.0 :</p>
 
-| Moteur | Sécurité | Débit (Mo/s) | Vitesse Relative |
-| :
---- | :
---- | :
---- | :
---- |
-| **`oxml (SWAR)`** | **100% Sûr** | **680 Mo/s** | **1.0x (Référence)** |
-| `quick-xml` | Mode sûr | 455 Mo/s | 0.67x |
-| `roxmltree` | DOM sûr | 310 Mo/s | 0.46x |
+<ul>
+  <li><strong>Navigation sur les axes :</strong> Prise en charge intégrale des 13 axes XPath (child, descendant, parent, ancestor, etc.).</li>
+  <li><strong>Fonctions standard :</strong> <code>count()</code>, <code>id()</code>, <code>string()</code>, <code>concat()</code>, <code>starts-with()</code>, <code>contains()</code>, <code>sum()</code>, <code>boolean()</code>, etc.</li>
+  <li><strong>Optimisation de position :</strong> Les prédicats d'index 1-based (ex. <code>[1]</code>, <code>[last()]</code>) s'évaluent en temps O(1).</li>
+</ul>
 
-## Empreinte Mémoire
-
-Le recyclage d'arène borne l'utilisation mémoire même en cas de modifications massives de l'arbre, évitant la fragmentation de l'allocateur.
+<p>Pour consulter les débits mesurés et les comparaisons de latence, consultez la page dédiée aux <a href="/fr/benchmarks/">Benchmarks</a>.</p>

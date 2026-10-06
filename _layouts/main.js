@@ -182,4 +182,25 @@
   }
 
   initTabs();
+
+  /* ---- Copy page as Markdown for AI agent discoverability ---- */
+  var copyMdBtn = document.getElementById("btn-copy-page-md");
+  if (copyMdBtn) {
+    copyMdBtn.addEventListener("click", function () {
+      var prose = document.querySelector(".prose");
+      var title = document.querySelector(".doc-h");
+      var lead = document.querySelector(".doc-lead");
+      if (!prose) return;
+      var text = "# " + (title ? title.textContent.trim() : "") + "\n\n" +
+                 (lead ? "> " + lead.textContent.trim() + "\n\n" : "") +
+                 prose.innerText;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          var original = copyMdBtn.innerHTML;
+          copyMdBtn.innerHTML = '<span aria-hidden="true">✓</span> Copied!';
+          setTimeout(function () { copyMdBtn.innerHTML = original; }, 2000);
+        });
+      }
+    });
+  }
 })();

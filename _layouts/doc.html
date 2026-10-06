@@ -12,7 +12,10 @@
       <li><a href="{{locale_path}}lsp/"{{!cur_lsp}}>{{nav_lsp}}</a></li>
       <li><a href="{{locale_path}}schema/"{{!cur_schema}}>{{nav_schema}}</a></li>
       <li><a href="{{locale_path}}architecture/"{{!cur_arch}}>{{nav_arch}}</a></li>
+      <li><a href="{{locale_path}}compare/"{{!cur_compare}}>{{nav_compare}}</a></li>
+      <li><a href="{{locale_path}}benchmarks/"{{!cur_benchmarks}}>{{nav_benchmarks}}</a></li>
       <li><a href="{{locale_path}}conformance/"{{!cur_conformance}}>{{nav_conformance}}</a></li>
+      <li><a href="{{locale_path}}security/"{{!cur_security}}>{{nav_security}}</a></li>
       <li><a href="{{locale_path}}migrate-lxml/"{{!cur_migrate_lxml}}>{{nav_migrate_lxml}}</a></li>
       <li><a href="{{locale_path}}migrate-roxmltree/"{{!cur_migrate_roxmltree}}>{{nav_migrate_roxmltree}}</a></li>
       <li><a href="{{locale_path}}cookbook/"{{!cur_cookbook}}>{{nav_cookbook}}</a></li>
@@ -28,6 +31,11 @@
         <li><span aria-current="page">{{headline}}</span></li>
       </ol>
     </nav>
+
+    <div class="doc-actions-bar">
+      <button type="button" class="btn-copy-md" id="btn-copy-page-md" aria-label="Copy page as Markdown" title="Copy markdown representation for AI agents"><span aria-hidden="true">📋</span> Copy Markdown</button>
+      <a class="doc-agent-link" href="{{base_path}}llms.txt" title="Curated AI Agent documentation index">llms.txt</a>
+    </div>
 
     <p class="eyebrow">{{eyebrow}}</p>
     <h1 class="doc-h">{{headline}}</h1>

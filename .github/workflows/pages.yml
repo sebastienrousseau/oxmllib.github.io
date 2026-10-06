@@ -54,7 +54,7 @@ jobs:
 
       - name: Verify generated artifacts
         run: |
-          for f in .nojekyll CNAME 404.html agents.txt; do
+          for f in .nojekyll CNAME 404.html agents.txt llms.txt llms-full.txt; do
             if [ -e "public/$f" ]; then echo "ok      $f"; else echo "::error::missing $f"; exit 1; fi
           done
 

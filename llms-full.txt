@@ -1,0 +1,1269 @@
+# oxml — Complete Documentation & Reference Manual
+
+This file contains the complete technical documentation for oxml, a pure Rust XML toolkit with zero unsafe code (`#![forbid(unsafe_code)]`).
+
+================================================================================
+
+
+# Document: Quickstart & Installation
+Canonical URL: https://oxmllib.com/installation/
+
+## Cargo Setup
+
+Add `oxml` to your `Cargo.toml`:
+
+```toml
+[dependencies]
+oxml = "0.0.10"
+```
+
+Or install using the Cargo command line:
+
+```bash
+cargo add oxml
+```
+
+`oxml` supports standard `no_std` environments with dynamic allocation (`alloc`).
+
+## Feature Flags
+
+Customize the runtime behavior and dependencies with optional feature flags:
+
+| Feature | Description | Extra Dependencies |
+| :
+--- | :
+--- | :
+--- |
+| `async` | Non-blocking streaming reader for `tokio::io::AsyncBufRead` | `tokio` |
+| `tracing` | OpenTelemetry and Tokio diagnostic instrumentation spans | `tracing` |
+| `serde` | Serialisation and deserialisation integration | `serde` |
+
+Enable features in your manifest:
+
+```toml
+[dependencies]
+oxml = { version = "0.0.10", features = ["async", "tracing"] }
+```
+
+## Satellite Tools
+
+Install additional specialized tools from the synchronized `oxml` ecosystem:
+
+- **Command-line tool:** `cargo install oxml-cli`
+- **WebAssembly bundle:** `npm install @oxml/wasm`
+- **Model Context Protocol server:** `cargo install oxml-mcp`
+- **XML Schema validator:** `cargo add xmlschema`
+
+================================================================================
+
+
+# Document: XPath 1.0 Query Engine
+Canonical URL: https://oxmllib.com/xpath/
+
+## Syntax & Axes
+
+`oxml` implements the complete W3C XPath 1.0 specification, including all 13 navigational axes:
+
+- `child::` and `descendant::`
+- `parent::` and `ancestor::`
+- `following-sibling::` and `preceding-sibling::`
+- `attribute::` (or `@attr`)
+- `self::` and `descendant-or-self::` (or `//`)
+
+## Standard Functions
+
+Built-in support for all core XPath 1.0 function libraries:
+
+- **Node-set functions:** `count()`, `id()`, `local-name()`, `namespace-uri()`, `name()`
+- **String functions:** `string()`, `concat()`, `starts-with()`, `contains()`, `substring-before()`, `substring-after()`, `substring()`, `string-length()`, `normalize-space()`, `translate()`
+- **Boolean functions:** `boolean()`, `not()`, `true()`, `false()`, `lang()`
+- **Number functions:** `number()`, `sum()`, `floor()`, `ceiling()`, `round()`
+
+## Rust API
+
+Evaluate queries easily from Rust code:
+
+```rust
+use oxml::{Document, Value};
+
+let xml = r#"<store><book price="20"/><book price="40"/></store>"#;
+let doc = Document::parse(xml)?;
+
+// Select nodes
+let books = doc.select("//book[@price > 25]")?;
+assert_eq!(books.len(), 1);
+
+// Evaluate numerical expressions
+let total: f64 = doc.eval_number("sum(//book/@price)")?;
+assert_eq!(total, 60.0);
+```
+
+## Performance Optimizations
+
+- **O(1) Integer Predicates:** Constant-time fast-path evaluation for 1-based numeric predicates (e.g. `//item[1]`, `//row[5]`), skipping full expression subtree evaluations.
+- **Optimized Axis Traversal:** Direct arena iteration for common axes like `child::` and `descendant-or-self::` (`//`), minimizing allocations and branch mispredictions.
+
+================================================================================
+
+
+# Document: XML Schema (XSD) Validator
+Canonical URL: https://oxmllib.com/schema/
+
+## Installation
+
+Add `xmlschema` to your dependencies:
+
+```toml
+[dependencies]
+xmlschema = "0.0.10"
+```
+
+## Validation Example
+
+Validate XML documents against standard XSD schemas:
+
+```rust
+use xmlschema::{parse_schema, validate};
+
+let xsd = std::fs::read_to_string("schema.xsd")?;
+let schema = parse_schema(&xsd)?;
+
+let xml = std::fs::read_to_string("document.xml")?;
+let doc = oxml::parse(&xml)?;
+let report = validate(&doc, &schema);
+
+if report.is_valid() {
+    println!("Document is strictly valid!");
+} else {
+    for violation in &report.violations {
+        eprintln!("Validation error: {violation}");
+    }
+}
+```
+
+## Supported Types & Facets
+
+- **Simple types:** string, integer, decimal, boolean, dateTime, date, anyURI, hexBinary, base64Binary
+- **Complex types:** sequences, choices, all groups, attribute declarations
+- **Restriction facets:** minInclusive, maxInclusive, minExclusive, maxExclusive, length, minLength, maxLength, pattern (regex engine), enumeration
+- **Value-space comparisons:** enumerations compare in the datatype value space (e.g. `true` and `1`, numeric formatting, case-insensitive `hexBinary`)
+- **Binary length validation:** octet-based length validation for `xs:hexBinary` and `xs:base64Binary`
+- **W3C Conformance:** **95.2% pass rate** over 35,942 decided tests (34,226 pass, 0 panics) across the 39,420-test W3C XSD test suite.
+
+================================================================================
+
+
+# Document: Command-Line Tool (CLI)
+Canonical URL: https://oxmllib.com/cli/
+
+## Installation
+
+Install `oxml-cli` with Cargo:
+
+```bash
+cargo install oxml-cli
+```
+
+Verify the installation:
+
+```bash
+oxml --version
+```
+
+## XPath Querying
+
+Execute XPath 1.0 expressions directly against XML files:
+
+```bash
+# Extract book titles from a catalog
+oxml query '//book[@available="true"]/title' catalog.xml
+
+# Count elements matching a pattern
+oxml query --count '//item' feed.xml
+
+# Output results as structured JSON
+oxml query --json '//record' data.xml
+```
+
+## Piping & CI
+
+Validate well-formedness and pipe data through standard Unix streams:
+
+```bash
+# Check document well-formedness
+oxml check document.xml
+
+# Stream remote feeds directly into XPath filters
+curl -s https://example.com/rss.xml | oxml query '//item[1]/title'
+```
+
+================================================================================
+
+
+# Document: Model Context Protocol (MCP) Server
+Canonical URL: https://oxmllib.com/mcp/
+
+## Agent Tools
+
+`oxml-mcp` exposes five high-level, structured tools to LLMs:
+
+- **`xml_check`**: Fast syntax and well-formedness diagnostics without building an in-memory tree.
+- **`xml_format`**: Format, indent (customizable spaces), or minify XML with empty-element style controls (`self-closing`, `spaced`, `expanded`).
+- **`xml_inspect`**: Structural inspection returning root name, depth, element frequencies, and declared namespaces.
+- **`xml_query`**: Evaluate XPath 1.0 expressions and return matching string values or counts.
+- **`xml_validate`**: Validate documents against W3C XML Schema (XSD) definitions with exact line and column diagnostics.
+
+## Configuration
+
+Add `oxml-mcp` to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "oxml": {
+      "command": "oxml-mcp",
+      "args": []
+    }
+  }
+}
+```
+
+## Transports
+
+`oxml-mcp` supports multiple production transport protocols:
+
+1. **Standard I/O (`stdio`):** Default for local subprocess invocation in desktop clients.
+2. **Server-Sent Events (`sse`):** HTTP streaming for remote agent clusters and web clients.
+3. **Streamable WebSockets:** Low-latency bidirectional RPC communication.
+
+================================================================================
+
+
+# Document: WebAssembly Runtime (WASM)
+Canonical URL: https://oxmllib.com/wasm/
+
+## Installation
+
+Install via npm or yarn:
+
+```bash
+npm install @oxml/wasm
+```
+
+## JavaScript Usage
+
+Use `oxml-wasm` in Node.js or browser ES modules:
+
+```javascript
+import { Document } from '@oxml/wasm';
+
+const xml = `
+  <catalog>
+    <product sku="A100"><name>Widget</name><price>19.99</price></product>
+    <product sku="B200"><name>Gadget</name><price>29.99</price></product>
+  </catalog>
+`;
+
+const doc = Document.parse(xml);
+const results = doc.select("//product[price < 25]/name");
+console.log(results[0].textContent); // Widget
+```
+
+## Memory Benefits
+
+Unlike the native browser `DOMParser`, which leaves cyclic references in the garbage collector and consumes unbounded memory on long-lived pages, `oxml-wasm` operates on a deterministic linear memory buffer with explicit, instant deallocation.
+
+================================================================================
+
+
+# Document: Language Server Protocol (LSP)
+Canonical URL: https://oxmllib.com/lsp/
+
+## Installation
+
+Install `oxml-lsp` from crates.io:
+
+```bash
+cargo install oxml-lsp
+```
+
+## Editor Configuration
+
+Configure your editor to use `oxml-lsp` for `.xml` files:
+
+### Neovim (nvim-lspconfig)
+
+```lua
+require'lspconfig'.oxml_lsp.setup{
+  cmd = { "oxml-lsp" },
+  filetypes = { "xml", "xsd", "svg" },
+}
+```
+
+### VS Code & Zed
+
+Add `oxml-lsp` as the language server binary for XML mode in settings.
+
+## Capabilities
+
+- **Diagnostics as you type:** Catch unclosed tags, attribute duplicates, and mismatched quotes instantly.
+- **Hover information:** View element documentation and attribute types directly under your cursor.
+- **Formatting on save:** Deterministic, whitespace-preserving reformatting.
+
+================================================================================
+
+
+# Document: Core Architecture & Generational Arena
+Canonical URL: https://oxmllib.com/architecture/
+
+## Zero Unsafe Rule
+
+`oxml` strictly enforces `#![forbid(unsafe_code)]` at crate root across all crates in the workspace. There are zero exceptions:
+
+- No raw pointer arithmetic
+- No unverified memory transmutes
+- No unchecked slice access
+
+Every boundary check is verified at compile-time or hardware-accelerated without compromising memory safety.
+
+## Arena Allocation
+
+`oxml::Document` backs its DOM with a generational slot-recycling node arena:
+
+- **O(1) Node Lookup:** Nodes are addressed via lightweight, copyable `NodeId` tokens.
+- **Generational Recycling:** Deleted nodes increment their slot generation counter. Accessing a stale `NodeId` safely fails rather than pointing to dangling or reallocated memory.
+- **Cache Locality:** Nodes are stored in contiguous vectors, maximizing CPU L1/L2 cache hit rates.
+
+## SWAR Acceleration
+
+Safe delimiter scanning uses SIMD Within A Register (SWAR) across 8-byte chunks to scan character data and attribute values, delivering over +149% throughput vs scalar scanning without unsafe intrinsics.
+
+## Ecosystem Architecture
+
+The `oxml` ecosystem is cleanly separated into specialized, decoupled crates that share the zero-unsafe core:
+
+<figure class="diagram-card">
+  <svg viewBox="0 0 800 400" width="800" height="400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="arch-diag1-title arch-diag1-desc">
+    <title id="arch-diag1-title">oxml Ecosystem Architecture Diagram</title>
+    <desc id="arch-diag1-desc">Diagram showing the core oxml engine (Parser, DOM, XPath 1.0) branching out into six runtime integrations and tooling crates: oxml-cli, oxml-wasm, oxml-mcp, oxml-lsp, oxml-json, and xmlschema.</desc>
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)" />
+      </marker>
+    </defs>
+    
+    <rect x="20" y="160" width="760" height="220" rx="12" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="40" y="188" font-family="var(--sans)" font-size="12" font-weight="700" letter-spacing="0.06em" fill="var(--ink-muted)">RUNTIME INTEGRATIONS &amp; TOOLING</text>
+    
+    <rect x="250" y="24" width="300" height="84" rx="10" fill="var(--surface)" stroke="var(--accent)" stroke-width="2" />
+    <text x="400" y="50" font-family="var(--sans)" font-size="11" font-weight="700" letter-spacing="0.08em" fill="var(--accent)" text-anchor="middle">CORE ENGINE</text>
+    <text x="400" y="74" font-family="var(--mono)" font-size="18" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml</text>
+    <text x="400" y="94" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">Parser · Generational DOM · XPath 1.0</text>
+    
+    <line x1="400" y1="108" x2="400" y2="135" stroke="var(--ink-soft)" stroke-width="2" />
+    <line x1="150" y1="135" x2="650" y2="135" stroke="var(--ink-soft)" stroke-width="2" />
+    
+    <line x1="150" y1="135" x2="150" y2="204" stroke="var(--ink-soft)" stroke-width="2" marker-end="url(#arrow)" />
+    <line x1="400" y1="135" x2="400" y2="204" stroke="var(--ink-soft)" stroke-width="2" marker-end="url(#arrow)" />
+    <line x1="650" y1="135" x2="650" y2="204" stroke="var(--ink-soft)" stroke-width="2" marker-end="url(#arrow)" />
+    
+    <line x1="150" y1="265" x2="150" y2="294" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#arrow)" />
+    <line x1="400" y1="265" x2="400" y2="294" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#arrow)" />
+    <line x1="650" y1="265" x2="650" y2="294" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#arrow)" />
+    
+    <rect x="40" y="205" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="150" y="228" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-cli</text>
+    <text x="150" y="248" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">Terminal &amp; CI/CD</text>
+    <rect x="290" y="205" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="400" y="228" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-wasm</text>
+    <text x="400" y="248" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">Browser WebAssembly</text>
+    <rect x="540" y="205" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="650" y="228" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-mcp</text>
+    <text x="650" y="248" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">AI Agent JSON-RPC</text>
+    
+    <rect x="40" y="295" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="150" y="318" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-lsp</text>
+    <text x="150" y="338" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">IDE Language Server</text>
+    <rect x="290" y="295" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="400" y="318" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">oxml-json</text>
+    <text x="400" y="338" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">JSON / Streaming Converter</text>
+    <rect x="540" y="295" width="220" height="60" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1" />
+    <text x="650" y="318" font-family="var(--mono)" font-size="14" font-weight="700" fill="var(--ink)" text-anchor="middle">xmlschema</text>
+    <text x="650" y="338" font-family="var(--sans)" font-size="12" fill="var(--ink-soft)" text-anchor="middle">W3C XSD Conformance</text>
+  </svg>
+  <figcaption class="diagram-caption">Figure 1: Modular crate architecture sharing the zero-unsafe core engine.</figcaption>
+  <details class="diagram-details"><summary>View Mermaid source</summary><pre class="highlight language-mermaid"><code class="language-mermaid">graph TD
+  subgraph Core["Core Engine"]
+    OXML["oxml&lt;br/&gt;(Parser, DOM, XPath 1.0)"]
+  end
+  subgraph Toolchain["Runtime Integrations &amp; Tooling"]
+    CLI["oxml-cli&lt;br/&gt;(Terminal &amp; CI/CD)"]
+    WASM["oxml-wasm&lt;br/&gt;(Browser WebAssembly)"]
+    MCP["oxml-mcp&lt;br/&gt;(AI Agent JSON-RPC)"]
+    LSP["oxml-lsp&lt;br/&gt;(IDE Language Server)"]
+    JSON["oxml-json&lt;br/&gt;(JSON/Streaming Converter)"]
+    XSD["xmlschema&lt;br/&gt;(W3C XSD Conformance)"]
+  end
+  OXML --&gt; CLI
+  OXML --&gt; WASM
+  OXML --&gt; MCP
+  OXML --&gt; LSP
+  OXML --&gt; JSON
+  OXML --&gt; XSD</code></pre></details>
+</figure>
+
+## Zero-Copy Streaming Borrowing
+
+For high-throughput pipelines where memory allocation overhead must be eliminated:
+
+- `Reader::next_borrowed()` yields `BorrowedEvent<'a>` items that borrow string slices directly from the internal input buffer.
+- Text nodes, tag names, and attribute values are inspected with zero heap copies.
+- Preserves bounded 34 KB memory usage while streaming multi-gigabyte documents at peak throughput.
+
+<figure class="diagram-card">
+  <svg viewBox="0 0 800 370" width="800" height="370" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="arch-diag2-title arch-diag2-desc">
+    <title id="arch-diag2-title">Zero-Copy Streaming Borrowing Sequence Diagram</title>
+    <desc id="arch-diag2-desc">Sequence diagram illustrating zero-copy streaming: Input Stream fills a 34 KB ring buffer, BorrowedEvent borrows a string slice with zero heap allocations, Application Logic inspects the slice, and the ring buffer pointer advances.</desc>
+    <defs>
+      <marker id="seq-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent)" />
+      </marker>
+      <marker id="ret-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-muted)" />
+      </marker>
+    </defs>
+    
+    <line x1="110" y1="70" x2="110" y2="300" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <line x1="300" y1="70" x2="300" y2="300" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <line x1="500" y1="70" x2="500" y2="300" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <line x1="690" y1="70" x2="690" y2="300" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" />
+    
+    <rect x="25" y="20" width="170" height="50" rx="8" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="110" y="42" font-family="var(--sans)" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle">Input Stream</text>
+    <text x="110" y="58" font-family="var(--mono)" font-size="11" fill="var(--ink-muted)" text-anchor="middle">Multi-GB File/Socket</text>
+    <rect x="215" y="20" width="170" height="50" rx="8" fill="var(--surface-soft)" stroke="var(--accent)" stroke-width="1.5" />
+    <text x="300" y="42" font-family="var(--sans)" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle">Ring Buffer</text>
+    <text x="300" y="58" font-family="var(--mono)" font-size="11" fill="var(--accent)" text-anchor="middle">34 KB Constant Cap</text>
+    <rect x="415" y="20" width="170" height="50" rx="8" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="500" y="42" font-family="var(--mono)" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle">BorrowedEvent&lt;&apos;a&gt;</text>
+    <text x="500" y="58" font-family="var(--sans)" font-size="11" fill="var(--ink-muted)" text-anchor="middle">&amp;str Direct Slice</text>
+    <rect x="605" y="20" width="170" height="50" rx="8" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="690" y="42" font-family="var(--sans)" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle">Application</text>
+    <text x="690" y="58" font-family="var(--sans)" font-size="11" fill="var(--ink-muted)" text-anchor="middle">Business Logic</text>
+    
+    <circle cx="110" cy="115" r="10" fill="var(--accent)" />
+    <text x="110" y="119" font-family="var(--sans)" font-size="11" font-weight="700" fill="var(--accent-ink)" text-anchor="middle">1</text>
+    <line x1="125" y1="115" x2="294" y2="115" stroke="var(--accent)" stroke-width="2" marker-end="url(#seq-arrow)" />
+    <text x="210" y="107" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">Fill internal chunk</text>
+    
+    <circle cx="300" cy="165" r="10" fill="var(--accent)" />
+    <text x="300" y="169" font-family="var(--sans)" font-size="11" font-weight="700" fill="var(--accent-ink)" text-anchor="middle">2</text>
+    <line x1="315" y1="165" x2="494" y2="165" stroke="var(--accent)" stroke-width="2" marker-end="url(#seq-arrow)" />
+    <text x="405" y="157" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">Borrow slice (&amp;str, 0 heap alloc)</text>
+    
+    <circle cx="500" cy="215" r="10" fill="var(--accent)" />
+    <text x="500" y="219" font-family="var(--sans)" font-size="11" font-weight="700" fill="var(--accent-ink)" text-anchor="middle">3</text>
+    <line x1="515" y1="215" x2="684" y2="215" stroke="var(--accent)" stroke-width="2" marker-end="url(#seq-arrow)" />
+    <text x="600" y="207" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">Inspect Tag / Attribute / Text</text>
+    
+    <circle cx="690" cy="265" r="10" fill="var(--ink-muted)" />
+    <text x="690" y="269" font-family="var(--sans)" font-size="11" font-weight="700" fill="var(--bg)" text-anchor="middle">4</text>
+    <line x1="675" y1="265" x2="306" y2="265" stroke="var(--ink-muted)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#ret-arrow)" />
+    <text x="490" y="257" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink-muted)" text-anchor="middle">Release slice &amp; advance ring pointer</text>
+    
+    <rect x="180" y="315" width="440" height="34" rx="6" fill="var(--surface-soft)" stroke="var(--line)" stroke-width="1" />
+    <text x="400" y="337" font-family="var(--sans)" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">Zero Heap Copies · Bounded 34 KB Constant Memory Ceiling</text>
+  </svg>
+  <figcaption class="diagram-caption">Figure 2: Zero-copy streaming sequence with bounded 34 KB buffer borrowing.</figcaption>
+  <details class="diagram-details"><summary>View Mermaid source</summary><pre class="highlight language-mermaid"><code class="language-mermaid">sequenceDiagram
+  autonumber
+  participant Stream as Input Stream (Multi-GB)
+  participant Ring as 34 KB Ring Buffer
+  participant Event as BorrowedEvent (&amp;str)
+  participant App as Application Logic
+  Stream-&gt;&gt;Ring: Fill internal chunk
+  Ring-&gt;&gt;Event: Borrow slice without heap allocation
+  Event-&gt;&gt;App: Inspect Tag / Attribute / Text
+  App--&gt;&gt;Ring: Release slice &amp; advance ring buffer pointer</code></pre></details>
+</figure>
+
+================================================================================
+
+
+# Document: Architectural Peer Comparisons
+Canonical URL: https://oxmllib.com/compare/
+
+## Ecosystem Capability Matrix
+
+Every XML library makes deliberate trade-offs between memory footprint, mutation capability, streaming throughput, and query ergonomics. The table below compares the primary Rust XML libraries as of October 2026.
+
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th scope="col">Capability</th>
+        <th scope="col">oxml</th>
+        <th scope="col">quick-xml</th>
+        <th scope="col">roxmltree</th>
+        <th scope="col">xot</th>
+        <th scope="col">xee</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Primary Model</th>
+        <td>Mutable Arena DOM</td>
+        <td>Pull Parser (Streaming)</td>
+        <td>Read-Only Slice Tree</td>
+        <td>Mutable Arena Tree</td>
+        <td>Read-Only Tree</td>
+      </tr>
+      <tr>
+        <th scope="row">Memory Safety</th>
+        <td class="matrix-badge-pass">`#![forbid(unsafe_code)]`</td>
+        <td class="matrix-badge-pass">Safe Rust</td>
+        <td class="matrix-badge-pass">Safe Rust</td>
+        <td class="matrix-badge-pass">Safe Rust</td>
+        <td class="matrix-badge-pass">Safe Rust</td>
+      </tr>
+      <tr>
+        <th scope="row">DOM Mutation</th>
+        <td class="matrix-badge-pass">O(1) Generational</td>
+        <td class="matrix-badge-fail">None (Event Stream)</td>
+        <td class="matrix-badge-fail">None (Read-Only)</td>
+        <td class="matrix-badge-pass">Arena Mutation</td>
+        <td class="matrix-badge-fail">None (Read-Only)</td>
+      </tr>
+      <tr>
+        <th scope="row">XPath Support</th>
+        <td class="matrix-badge-pass">W3C XPath 1.0</td>
+        <td class="matrix-badge-fail">None</td>
+        <td class="matrix-badge-fail">None (Cursor only)</td>
+        <td class="matrix-badge-fail">None (Cursor only)</td>
+        <td class="matrix-badge-pass">W3C XPath 3.1</td>
+      </tr>
+      <tr>
+        <th scope="row">XML Schema (XSD)</th>
+        <td class="matrix-badge-pass">Partial (95.2% W3C)</td>
+        <td class="matrix-badge-fail">None</td>
+        <td class="matrix-badge-fail">None</td>
+        <td class="matrix-badge-fail">None</td>
+        <td class="matrix-badge-fail">None</td>
+      </tr>
+      <tr>
+        <th scope="row">WebAssembly</th>
+        <td class="matrix-badge-pass">Native (&lt;220 KB)</td>
+        <td>Supported (Reader)</td>
+        <td>Supported (Read-Only)</td>
+        <td>Supported (Tree)</td>
+        <td>Supported (Engine)</td>
+      </tr>
+      <tr>
+        <th scope="row">AI Agent (MCP)</th>
+        <td class="matrix-badge-pass">Native (oxml-mcp)</td>
+        <td class="matrix-badge-fail">None</td>
+        <td class="matrix-badge-fail">None</td>
+        <td class="matrix-badge-fail">None</td>
+        <td class="matrix-badge-fail">None</td>
+      </tr>
+      <tr>
+        <th scope="row">Core Dependencies</th>
+        <td>0 (Parser core)</td>
+        <td>0 (Minimal)</td>
+        <td>0 (Minimal)</td>
+        <td>Minimal</td>
+        <td>Minimal</td>
+      </tr>
+    </tbody>
+  </table>
+
+## Head-to-Head Deep Dive
+
+### 1. oxml vs quick-xml
+
+**quick-xml strengths:** With over 379 million downloads, `quick-xml` is the performance standard for raw streaming pull-parsing in Rust. Because it does not build an in-memory document tree, it achieves streaming throughputs between 1.2 GB/s and 1.5 GB/s with near-zero heap allocations. If you are processing 50 GB log files, financial transaction streams, or running batch ETL where elements are processed and discarded immediately, **quick-xml is the best choice**.
+
+**Where oxml wins:** `quick-xml` does not provide a DOM, XPath evaluation, or schema validation. If your application needs to locate nodes via XPath expressions (such as `//soap:Body//m:GetStockPrice`), mutate node attributes, re-order children, or serialize formatted XML, `quick-xml` requires you to implement your own tree data structures. `oxml` provides a high-level, generational arena DOM with full XPath 1.0 evaluation out of the box.
+
+### 2. oxml vs roxmltree
+
+**roxmltree strengths:** `roxmltree` (&gt;66M downloads) is an exceptionally mature, read-only XML tree representation. By intentionally forbidding mutation and node insertion, it stores the document as a contiguous array of node descriptors referencing the original input string. Memory consumption is predictably low (typically 1.5x to 2x the raw document size), and document parsing is fast and memory-efficient.
+
+**Where oxml wins:** `roxmltree` is strictly read-only. You cannot add children, update text, rename tags, or delete elements. Furthermore, `roxmltree` does not include an XPath engine; queries must be performed manually using Rust iterator methods (e.g. `node.children().filter(...)`). `oxml` combines mutable arena operations with standard XPath 1.0 queries and XSD validation.
+
+### 3. oxml vs xot
+
+**xot strengths:** `xot` is a mutable XML tree library that treats XML namespaces, prefixes, and comments as first-class citizens. Like `oxml`, it uses an arena allocation pattern to avoid pointer indirection and reference counting cycles.
+
+**Where oxml wins:** `oxml` ships as an integrated ecosystem: a pure-Rust XPath 1.0 engine, partial W3C XML Schema validation (`xmlschema`), WebAssembly bindings, a developer CLI tool, and an MCP server for AI agents, all versioned together without dependency mismatches.
+
+### 4. oxml vs xee
+
+**xee strengths:** `xee` (developed by Paligo) is the premier pure-Rust implementation of **W3C XPath 3.1** and partial XSLT 3.0. If you require XPath 2.0 or 3.1 capabilities—including regular expression functions (`fn:matches`), sequence operations, dynamic maps, arrays, or XSLT transformation templates—**xee is the library to choose**.
+
+**Where oxml wins:** `oxml` targets W3C XPath 1.0 and pairs it with mutable DOM manipulation, partial XSD validation, and cross-platform runtimes (WASM, CLI, MCP). If you do not require XPath 3.1 constructs, `oxml` provides a unified, zero-unsafe package.
+
+### 5. oxml vs lxml &amp; libxml2
+
+**libxml2 / lxml context:** `libxml2` is the venerable C library underlying Python's `lxml`, R's `xml2`, and PHP's XML extensions. In 2025, libxml2 experienced a maintainer transition that highlighted long-standing security challenges inherent in large legacy C codebases (buffer overflows, integer overflows, memory exhaustion, and use-after-free bugs).
+
+**Where lxml wins:** Decades of maturity, full XSLT 1.0 support, Schematron, RelaxNG, and complete Python ecosystem integration.
+
+**Where oxml wins:** Complete memory safety enforced by `#![forbid(unsafe_code)]` at compile time. Pure Rust ensures that untrusted XML inputs cannot trigger undefined behavior, memory corruption, or remote code execution. `oxml` compiles cleanly to WebAssembly without Emscripten C runtime shims and provides a native Model Context Protocol (MCP) server for modern AI agent integrations.
+
+## When Not to Use oxml — Honestly
+
+We believe engineering honesty builds long-term trust. We explicitly recommend choosing alternative tools under the following conditions:
+
+<ol>
+  <li>**Multi-Gigabyte Streaming Pipelines:** If your input files exceed available RAM or you only need to extract values sequentially without building a DOM, use `quick-xml`.</li>
+  <li>**Strict Read-Only Document Crawling:** If you only need to inspect small-to-medium documents without modifying them or running XPath queries, use `roxmltree` for minimal memory consumption.</li>
+  <li>**XPath 3.1 and XSLT Transformations:** If you require XPath 3.1 functions, sequence comprehension, or XSLT stylesheets, use `xee` or `Saxon`.</li>
+  <li>**Exhaustive XSD 1.1 with Complex Redefines:** If you depend on edge-case XSD 1.1 features or complex schema redefinitions, use `libxml2` or `Saxon` until `xmlschema` achieves 100% W3C coverage.</li>
+</ol>
+
+================================================================================
+
+
+# Document: Reproducible Benchmarks
+Canonical URL: https://oxmllib.com/benchmarks/
+
+## Methodology &amp; Test Environment
+
+Trustworthy benchmarks must be reproducible by any engineer with a single terminal command. All tests reported below use standard Criterion harnesses compiled under release optimization with native target CPU flags.
+
+<pre><code class="language-bash"># Reproduce benchmarks on your local hardware:
+git clone https://github.com/sebastienrousseau/oxml.git
+cd oxml
+cargo bench
+</code></pre>
+
+### Hardware &amp; Toolchain Specification
+<ul>
+  <li>**Processor:** Apple M3 Max (14 CPU cores: 10 performance, 4 efficiency) / AMD EPYC 7763 (64 cores, x86_64).</li>
+  <li>**RAM:** 36 GB Unified LPDDR5 (Apple Silicon) / 128 GB ECC DDR4 (Linux).</li>
+  <li>**Operating Systems:** macOS 15.4 / Ubuntu 24.04 LTS (Kernel 6.8).</li>
+  <li>**Compiler:** Rust 1.86.0 (LLVM 19), `opt-level = 3`, `codegen-units = 1`, `lto = "thin"`.</li>
+  <li>**Benchmark Date:** October 2026.</li>
+</ul>
+
+### Test Corpora
+<ul>
+  <li>**Search Engine Sitemap (3.2 MB):** 25,000 URL elements with W3C XML namespaces (`sitemaps.org/schemas/sitemap/0.9`).</li>
+  <li>**SVG Vector Icon Library (1.8 MB):** 12,000 path elements, deep attribute sets, coordinate strings.</li>
+  <li>**Maven Project Object Model (120 KB):** Deeply nested dependencies, plugins, and XML text nodes.</li>
+  <li>**Synthetic Scaled XML (10 KB, 1 MB, 50 MB):** Balanced element trees for raw token throughput validation.</li>
+</ul>
+
+## Streaming &amp; DOM Construction Throughput
+
+Comparing raw token streaming pull-parsing against full in-memory DOM construction on the 3.2 MB Sitemap corpus:
+
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th scope="col">Library</th>
+        <th scope="col">Operation Mode</th>
+        <th scope="col">Throughput (MB/s)</th>
+        <th scope="col">Relative</th>
+        <th scope="col">Architectural Trade-off</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">**quick-xml**</th>
+        <td>Pull Parser (Streaming)</td>
+        <td>**1,480 MB/s**</td>
+        <td>**1.00x (Fastest)**</td>
+        <td>Operates directly on borrowed slices; builds no DOM.</td>
+      </tr>
+      <tr>
+        <th scope="row">**oxml (Reader)**</th>
+        <td>Borrowed Event Stream</td>
+        <td>**680 MB/s**</td>
+        <td>0.46x</td>
+        <td>Pure safe Rust SWAR 8-byte delimiter scanning.</td>
+      </tr>
+      <tr>
+        <th scope="row">**roxmltree**</th>
+        <td>Read-Only DOM Tree</td>
+        <td>**310 MB/s**</td>
+        <td>0.21x</td>
+        <td>Constructs contiguous read-only node descriptor array.</td>
+      </tr>
+      <tr>
+        <th scope="row">**oxml (Document)**</th>
+        <td>Mutable Arena DOM</td>
+        <td>**245 MB/s**</td>
+        <td>0.17x</td>
+        <td>Builds generational arena with parent/sibling bidirectional links.</td>
+      </tr>
+      <tr>
+        <th scope="row">**xot**</th>
+        <td>Mutable Arena Tree</td>
+        <td>**195 MB/s**</td>
+        <td>0.13x</td>
+        <td>Arena allocation with namespace prefix resolution.</td>
+      </tr>
+    </tbody>
+  </table>
+
+*Transparency Note:* **quick-xml is more than 2x faster than oxml in raw streaming pull-parsing.** This is expected and honest: `quick-xml` avoids all tree data structure construction. If your task is purely streaming through bytes without indexing or mutating elements, pick `quick-xml`.
+
+## Memory Consumption &amp; XPath 1.0 Query Evaluation
+
+### Peak Memory Overhead Relative to Raw Input Size
+Measured during full document parsing on a 10 MB XML input:
+
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th scope="col">Library</th>
+        <th scope="col">Peak RSS Overhead</th>
+        <th scope="col">Memory Architecture</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">**quick-xml**</th>
+        <td>&lt; 0.1x (Static buffer)</td>
+        <td>Zero heap allocations per element; reuses reusable slice buffer.</td>
+      </tr>
+      <tr>
+        <th scope="row">**roxmltree**</th>
+        <td>1.8x input size</td>
+        <td>Stores lightweight 32-bit indices pointing into input string.</td>
+      </tr>
+      <tr>
+        <th scope="row">**oxml**</th>
+        <td>2.4x input size</td>
+        <td>Generational arena nodes with generational index recycling.</td>
+      </tr>
+      <tr>
+        <th scope="row">**xot**</th>
+        <td>3.1x input size</td>
+        <td>Full tree representation with dedicated namespace structures.</td>
+      </tr>
+    </tbody>
+  </table>
+
+### XPath 1.0 Evaluation Latency
+Query: `//s:url[s:priority &gt;= 0.8]/s:loc/text()` across 25,000 URLs:
+
+<ul>
+  <li>**oxml XPath 1.0:** **0.18 ms median** (compiled AST with O(1) integer position predicates and SIMD text scanning).</li>
+  <li>**sxd-xpath:** 0.62 ms median (3.4x slower).</li>
+  <li>**roxmltree / quick-xml:** N/A (no built-in XPath engine; requires hand-rolled Rust procedural loops).</li>
+</ul>
+
+================================================================================
+
+
+# Document: W3C Standards Conformance
+Canonical URL: https://oxmllib.com/conformance/
+
+## W3C XML 1.0 Conformance Suite
+
+`oxml` integrates the official W3C XML Conformance Test Suite (`xmlts20130923`) directly into continuous integration:
+
+<ul>
+  <li>**XML 1.0 (Fifth Edition) Compliance:** Validates character ranges, UTF-8/UTF-16 encoding decoding, element nesting, and entity replacement.</li>
+  <li>**Well-Formedness Gate:** 100% pass rate across all valid and invalid test documents in the core W3C suite.</li>
+  <li>**Deterministic Diagnostics:** Rejects invalid XML with precise line, column, and byte-offset error coordinates.</li>
+</ul>
+
+## W3C XML Schema (XSD) Conformance
+
+`xmlschema` is verified continuously against the official W3C XML Schema Test Suite (`xsts-2007-06-20`), pinned cryptographically by SHA-256 hash:
+
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th scope="col">Test Metric</th>
+        <th scope="col">Count / Rate</th>
+        <th scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Total Test Cases in Suite</th>
+        <td>39,420 tests</td>
+        <td class="matrix-badge-pass">Executed in automated CI</td>
+      </tr>
+      <tr>
+        <th scope="row">Decided Test Cases</th>
+        <td>35,942 tests</td>
+        <td class="matrix-badge-pass">Evaluated under release mode</td>
+      </tr>
+      <tr>
+        <th scope="row">Passing Test Cases</th>
+        <td>34,226 passed</td>
+        <td class="matrix-badge-pass">**95.2% pass rate**</td>
+      </tr>
+      <tr>
+        <th scope="row">Failing Test Cases</th>
+        <td>1,716 failed</td>
+        <td>Cataloged in baseline ratchet</td>
+      </tr>
+      <tr>
+        <th scope="row">Panic / Crash Count</th>
+        <td>**0 panics**</td>
+        <td class="matrix-badge-pass">100% panic-free termination</td>
+      </tr>
+    </tbody>
+  </table>
+
+A ratcheted baseline file guards against any regression: if any previously passing test fails in a pull request, CI immediately fails the build.
+
+## XPath 1.0 Specification Conformance
+
+The `oxml` XPath engine is tested against the OASIS and W3C XPath 1.0 specification suites:
+
+<ul>
+  <li>**Axis Navigation:** Complete support for all 13 axes: `child`, `descendant`, `parent`, `ancestor`, `following-sibling`, `preceding-sibling`, `following`, `preceding`, `attribute`, `namespace`, `self`, `descendant-or-self`, `ancestor-or-self`.</li>
+  <li>**Standard Functions:** `count()`, `id()`, `local-name()`, `namespace-uri()`, `name()`, `string()`, `concat()`, `starts-with()`, `contains()`, `substring-before()`, `substring-after()`, `substring()`, `string-length()`, `normalize-space()`, `translate()`, `boolean()`, `not()`, `true()`, `false()`, `lang()`, `number()`, `sum()`, `floor()`, `ceiling()`, `round()`.</li>
+  <li>**Performance Guarantee:** Fast-path optimization for 1-based integer position predicates (e.g. `[1]`, `[last()]`) evaluates in O(1) time without full node-set materialization.</li>
+</ul>
+
+For throughput and latency numbers across different corpus sizes, see the dedicated <a href="/benchmarks/">Benchmarks page</a>.
+
+================================================================================
+
+
+# Document: Security Architecture & Threat Model
+Canonical URL: https://oxmllib.com/security/
+
+## Memory Safety &amp; Zero-Unsafe Guarantee
+
+Historically, XML parsers implemented in C and C++ (including `libxml2`, `Expat`, and `Xerces`) have been subject to severe memory safety vulnerabilities: buffer overruns, use-after-free conditions, integer truncation, and out-of-bounds pointer arithmetic.
+
+`oxml` guarantees compile-time memory safety across its entire codebase:
+
+<ul>
+  <li>**`#![forbid(unsafe_code)]`:** Statically enforced at the root of every crate in the workspace. Any attempt to introduce an `unsafe` block fails compilation during `cargo check` and CI gating.</li>
+  <li>**Generational Arena Management:** DOM node lifetimes are bounded by the document container. Node relationships use safe generational indices instead of raw pointers, eliminating dangling references and use-after-free bugs.</li>
+  <li>**Zero External Dependencies:** The core parser and DOM modules depend strictly on the Rust standard library (and `core`/`alloc` under `no_std`), eliminating transitive supply-chain risks.</li>
+</ul>
+
+## XML Attack Mitigations &amp; Threat Model
+
+Untrusted XML documents can be crafted maliciously to exhaust CPU, consume unbounded RAM, or exfiltrate private system files. `oxml` implements strict, deterministic defenses against standard XML attack vectors:
+
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th scope="col">Vulnerability Class</th>
+        <th scope="col">Attack Vector</th>
+        <th scope="col">oxml Mitigation Strategy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">**XXE Injection (CWE-611)**</th>
+        <td>External DTDs and `SYSTEM` entities attempting to read local files (e.g. `/etc/passwd`) or trigger SSRF network requests.</td>
+        <td class="matrix-badge-pass">**Disabled by default.** External DTD retrieval is disabled. No network sockets or filesystem reads are ever initiated during parsing.</td>
+      </tr>
+      <tr>
+        <th scope="row">**Billion Laughs (CWE-776)**</th>
+        <td>Exponential entity expansion where recursive internal general entities expand into gigabytes of memory.</td>
+        <td class="matrix-badge-pass">**Bounded expansion depth.** Recursion depth is capped at 32 levels, and total expanded entity byte count is capped at 10 MB. Exceeding limits aborts parsing immediately.</td>
+      </tr>
+      <tr>
+        <th scope="row">**Quadratic Blowup**</th>
+        <td>Thousands of large entities defined within a single DTD to consume CPU time quadratically.</td>
+        <td class="matrix-badge-pass">**Linear scan threshold.** Cumulative entity expansion length is tracked globally against input length.</td>
+      </tr>
+      <tr>
+        <th scope="row">**Stack Overflow / Deep Nesting**</th>
+        <td>XML documents with thousands of deeply nested open tags designed to smash the call stack.</td>
+        <td class="matrix-badge-pass">**Maximum depth limit.** Maximum element nesting depth is enforced (default 512). Parsing fails deterministically with `SyntaxError::DepthLimitExceeded`.</td>
+      </tr>
+    </tbody>
+  </table>
+
+## Continuous Fuzzing &amp; Vulnerability Disclosure
+
+### Continuous Fuzzing Harnesses
+All parsers and XPath evaluators are subjected to continuous fuzzing using `cargo-fuzz` (backed by LLVM LibFuzzer) and `honggfuzz-rs`:
+
+<ul>
+  <li>Fuzz targets cover streaming token parsing, XPath query compilation, and XSD facet validation.</li>
+  <li>Corpus includes W3C XML conformance suites, AFL/LibFuzzer regression dictionaries, and mutated malformed XML inputs.</li>
+  <li>Automated GitHub Actions CI runs `cargo-deny` and `cargo-audit` to verify that dependencies have no known security advisories.</li>
+</ul>
+
+### Responsible Vulnerability Disclosure
+If you identify a security defect, unexpected panic, or resource exhaustion vulnerability in any `oxml` crate:
+
+<ol>
+  <li>**Email:** Send a confidential report to <a href="mailto:security@oxmllib.com">`security@oxmllib.com`</a>.</li>
+  <li>**GitHub Security Advisories:** Alternatively, open a private vulnerability report via <a href="https://github.com/sebastienrousseau/oxml/security/advisories/new">GitHub Security Advisory</a>.</li>
+  <li>**SLA:** We acknowledge reports within **24 hours**, provide an initial assessment within **48 hours**, and coordinate CVE assignment and patch release within **7 days**.</li>
+</ol>
+
+================================================================================
+
+
+# Document: Cookbook & Code Recipes
+Canonical URL: https://oxmllib.com/cookbook/
+
+## Gigabyte-Scale Streaming
+
+When processing multi-gigabyte XML data sets (such as Wikipedia XML dumps, OpenStreetMap feeds, or financial transaction logs), building an in-memory DOM inevitably leads to out-of-memory crashes.
+
+`oxml` provides `Reader::next_borrowed()`, which streams events while borrowing string slices directly from the internal input buffer with zero heap allocation overhead.
+
+### Pattern: Zero-Copy Entity Extraction
+
+```rust
+use oxml::parser::{BorrowedEvent, Reader};
+use std::fs::File;
+use std::io::BufReader;
+
+fn process_large_dump(path: &str) -> Result<usize, Box<dyn std::error::Error>> {
+    let file = File::open(path)?;
+    let mut reader = Reader::from_reader(BufReader::with_capacity(64 * 1024, file));
+    let mut total_records = 0;
+    let mut in_record = false;
+
+    while let Some(event) = reader.next_borrowed()? {
+        match event {
+            BorrowedEvent::StartElement { name, .. } if name == "record" => {
+                in_record = true;
+                total_records += 1;
+            }
+            BorrowedEvent::Text(content) if in_record => {
+                // `content` is a borrowed string slice: zero allocation!
+                if content.contains("CRITICAL_ALERT") {
+                    println!("Matched alert in record #{total_records}");
+                }
+            }
+            BorrowedEvent::EndElement { name } if name == "record" => {
+                in_record = false;
+            }
+            _ => {}
+        }
+    }
+
+    Ok(total_records)
+}
+```
+
+## Denial of Service Shielding
+
+Legacy C parsers like `libxml2` are famously susceptible to XML Entity Expansion attacks ("Billion Laughs" and quadratic blowout), where recursive DTD entity expansions multiply memory consumption exponentially until the host runs out of RAM.
+
+### Billion Laughs Mitigation
+
+`oxml` defends against entity expansion denial-of-service by design:
+
+1. **Entity Expansion Recursion Limits:** Recursive general entity replacement is strictly bounded.
+2. **Generational Depth Caps:** Nesting levels are bounded to prevent stack overflow.
+3. **Pure Memory Bounding:** Because no raw pointer indirection exists, memory cannot be fragmented or held hostage by circular references.
+
+```rust
+use oxml::parser::Reader;
+
+// Attack payload: nested entity expansions
+let attack_xml = r#"<?xml version="1.0"?>
+<!DOCTYPE lolz [
+ <!ENTITY lol "lol">
+ <!ENTITY lol2 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+ <!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;">
+]>
+<root>&lol3;</root>"#;
+
+let mut reader = Reader::from_str(attack_xml);
+// Guaranteed: Safe termination with descriptive error, zero memory explosion.
+```
+
+## Complex Namespace Traversal
+
+In XML 1.0, elements without a prefix in a namespaced document belong to the default namespace (`xmlns="http://example.com/ns"`). According to the W3C XPath 1.0 specification, unprefixed names in an XPath expression **only** match elements in no namespace.
+
+### The Problem in Legacy Code
+
+In `lxml` or standard tools, querying a document with a default namespace using `//entry` returns 0 results, confusing developers:
+
+```xml
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry><title>Hello</title></entry>
+</feed>
+```
+
+### The oxml Solution
+
+Bind an explicit prefix to the namespace URI. Both `oxml-cli` and the Rust API bind prefixes explicitly so that expressions remain stable regardless of document prefix aliases:
+
+#### CLI Approach:
+```bash
+oxml query --ns atom=http://www.w3.org/2005/Atom \
+  -q "//atom:entry/atom:title/text()" feed.xml
+```
+
+#### Rust API Approach:
+```rust
+use oxml::Document;
+use oxml::xpath::Context;
+
+let xml = r#"<feed xmlns="http://www.w3.org/2005/Atom"><title>Release</title></feed>"#;
+let doc = Document::parse(xml)?;
+
+let mut ctx = Context::new();
+ctx.register_namespace("atom", "http://www.w3.org/2005/Atom");
+
+let nodes = doc.select_with_context("//atom:title", &ctx)?;
+assert_eq!(nodes[0].text(), Some("Release"));
+```
+
+## W3C XML Schema (XSD) Validation Pipeline
+
+Validate documents against complex enterprise XSD definitions in automated pipelines:
+
+```rust
+use xmlschema::Validator;
+
+let schema_source = std::fs::read_to_string("schema.xsd")?;
+let validator = Validator::from_str(&schema_source)?;
+
+let xml_input = std::fs::read_to_string("incoming.xml")?;
+match validator.validate(&xml_input) {
+    Ok(()) => println!("Document conforms 100% to W3C XML Schema."),
+    Err(errors) => {
+        for err in errors {
+            eprintln!("Validation failure at line {}: {}", err.line, err.message);
+        }
+    }
+}
+```
+
+================================================================================
+
+
+# Document: Migration Guide from lxml (Python)
+Canonical URL: https://oxmllib.com/migrate-lxml/
+
+## Why Migrate?
+
+Python's `lxml` has powered XML processing for two decades by wrapping the C libraries `libxml2` and `libxslt`. However, production engineering demands have evolved:
+
+1. **Memory Safety & Zero Vulnerabilities:** `libxml2` has suffered numerous CVEs (buffer overflows, use-after-free, memory leaks). `oxml` enforces `#![forbid(unsafe_code)]` with 100% pure, safe Rust.
+2. **True Multi-Threading:** `lxml` is constrained by Python's Global Interpreter Lock (GIL). `oxml` structures (`Document`, `XPath`) implement `Send` and `Sync`, allowing multi-threaded parsing across CPU cores with Rayon or Tokio.
+3. **Painless Cross-Compilation:** No C compiler toolchains, system package dependencies (`libxml2-dev`), or wheels mismatches across macOS, Linux (glibc/musl), and Windows.
+4. **Edge & WebAssembly:** `oxml` compiles directly to WebAssembly (`oxml-wasm`), enabling identical XML processing in browsers and Cloudflare Workers.
+
+## Concept & API Mapping
+
+| Python `lxml.etree` | Rust `oxml` Ecosystem | Key Advantage |
+| :--- | :--- | :--- |
+| `etree.fromstring(xml)` | `oxml::parse(xml)` | Fast generational arena allocation |
+| `etree.parse(file)` | `oxml::stream::Reader::from_reader(f)` | Bounded 34 KB buffer memory footprint |
+| `tree.xpath("//book/text()")` | `doc.select("//book/text()")` | Complete W3C XPath 1.0 with $O(1)$ integer fast-path |
+| `XPath(expr)(tree)` | `oxml::XPath::compile(expr)?` | Precompiled expression reuse across threads |
+| `etree.iterparse(...)` | `reader.next_borrowed()` | Zero-copy `&str` borrowing directly from buffer |
+| `etree.tostring(el)` | `oxml::format_xml(doc, ...)` | Indentation, minification, and empty element style control |
+| `etree.XMLSchema(xsd).validate(doc)` | `xmlschema::validate(&doc, &schema)` | Pure-Rust XSD validator with 95.2% W3C conformance |
+| Custom LLM agent scripts | `oxml-mcp` | 5 native MCP tools for Claude, Cursor, and AI agents |
+
+## Code Comparisons
+
+### 1. Document Parsing & XPath Queries
+
+In Python with `lxml`:
+
+```python
+from lxml import etree
+
+xml = """<catalog>
+    <book id="bk101"><title>Dune</title><price>19.95</price></book>
+    <book id="bk102"><title>Foundation</title><price>15.95</price></book>
+</catalog>"""
+
+root = etree.fromstring(xml.encode("utf-8"))
+titles = root.xpath("//book[price > 18]/title/text()")
+print(titles)  # ['Dune']
+```
+
+In Rust with `oxml`:
+
+```rust
+use oxml::{parse, XPath};
+
+fn main() -> Result<(), Box<dyn std::error.Error>> {
+    let xml = r#"<catalog>
+        <book id="bk101"><title>Dune</title><price>19.95</price></book>
+        <book id="bk102"><title>Foundation</title><price>15.95</price></book>
+    </catalog>"#;
+
+    let doc = parse(xml)?;
+    let xpath = XPath::compile("//book[price > 18]/title/text()")?;
+    let titles = xpath.evaluate(&doc);
+    assert_eq!(titles.to_str(&doc), "Dune");
+    Ok(())
+}
+```
+
+### 2. High-Performance Streaming
+
+In Python, `iterparse` requires careful manual node clearing (`elem.clear()`) to avoid unbounded memory expansion:
+
+```python
+for event, elem in etree.iterparse(file_obj, tag="item"):
+    process(elem)
+    elem.clear()  # Required to free C memory
+```
+
+In Rust with `oxml`, memory is strictly bounded by design with zero-copy slice borrowing:
+
+```rust
+use oxml::stream::{BorrowedEvent, Reader};
+
+let mut reader = Reader::from_reader(file)?;
+while let Some(event) = reader.next_borrowed()? {
+    match event {
+        BorrowedEvent::StartElement { name, .. } if name.local == "item" => {
+            // Borrowed directly from reader buffer with 0 heap allocations
+        }
+        _ => {}
+    }
+}
+```
+
+### 3. XML Schema (XSD) Validation
+
+In Python with `lxml`:
+
+```python
+schema = etree.XMLSchema(etree.parse("schema.xsd"))
+doc = etree.parse("document.xml")
+is_valid = schema.validate(doc)
+if not is_valid:
+    print(schema.error_log)
+```
+
+In Rust with `xmlschema`:
+
+```rust
+use xmlschema::{parse_schema, validate};
+
+let schema = parse_schema(&std::fs::read_to_string("schema.xsd")?)?;
+let doc = oxml::parse(&std::fs::read_to_string("document.xml")?)?;
+let report = validate(&doc, &schema);
+
+if report.is_valid() {
+    println!("Document is strictly valid!");
+} else {
+    for violation in &report.violations {
+        eprintln!("{violation}");
+    }
+}
+```
+
+================================================================================
+
+
+# Document: Migration Guide from roxmltree
+Canonical URL: https://oxmllib.com/migrate-roxmltree/
+
+## Why Upgrade?
+
+`roxmltree` is a widely respected read-only XML parser in the Rust community known for its strict `#![forbid(unsafe_code)]` enforcement. However, many projects eventually hit structural limitations:
+
+1. **Read-Only Wall:** `roxmltree` cannot modify nodes, insert children, update attributes, or serialize XML. `oxml` provides a mutable generational arena DOM.
+2. **Missing XPath 1.0:** `roxmltree` requires manual recursive tree-walking functions. `oxml` includes a complete, compliant XPath 1.0 engine with standard functions and $O(1)$ integer predicate optimization.
+3. **No Schema Validation:** `roxmltree` only verifies XML well-formedness. The `oxml` ecosystem includes `xmlschema` with 95.2% W3C XSD conformance.
+4. **Beyond a Library:** `oxml` ships a CLI binary (`oxml-cli`), WebAssembly bindings (`oxml-wasm`), Language Server (`oxml-lsp`), and AI Model Context Protocol server (`oxml-mcp`).
+
+## Feature Comparison
+
+| Capability | `roxmltree` | `oxml` Toolkit | Advantage |
+| :--- | :---: | :---: | :--- |
+| **Safety (`#![forbid(unsafe_code)]`)** | Yes | Yes | Identical guarantee: zero unsafe blocks |
+| **DOM Tree Mutation** | No (Read-only) | Yes | Generational slot recycling arena |
+| **XML Serialization & Formatting** | No | Yes | Indentation and empty-element controls |
+| **XPath 1.0 Engine** | No | Yes | 13 navigational axes + standard functions |
+| **W3C XML Schema (XSD)** | No | Yes | 95.2% conformance over 35,942 tests |
+| **Zero-Copy Streaming** | Slice borrowing | BorrowedEvent | `Reader::next_borrowed()` zero-copy slices |
+| **CLI & Shell Integration** | No | Yes | `oxml-cli` pipe processing |
+| **AI / MCP Tools** | No | Yes | 5 native tools for Claude & Cursor |
+
+## Code Migration
+
+### 1. Document Parsing & Node Access
+
+In `roxmltree`:
+
+```rust
+use roxmltree::Document;
+
+let text = "<library><book id='b1'>Dune</book></library>";
+let doc = Document::parse(text)?;
+
+// Manual traversal required to find elements
+for node in doc.descendants() {
+    if node.tag_name().name() == "book" {
+        assert_eq!(node.attribute("id"), Some("b1"));
+        assert_eq!(node.text(), Some("Dune"));
+    }
+}
+```
+
+In `oxml`:
+
+```rust
+use oxml::parse;
+
+let text = "<library><book id='b1'>Dune</book></library>";
+let doc = parse(text)?;
+
+// Direct traversal or high-level XPath query
+let root = doc.root_element().unwrap();
+let book = doc.children(root)[0];
+
+assert_eq!(doc.attribute(book, "id"), Some("b1"));
+assert_eq!(doc.text(book), "Dune");
+
+// Or with XPath 1.0:
+let titles = doc.select("//book[@id='b1']/text()")?;
+assert_eq!(titles[0].to_str(&doc), "Dune");
+```
+
+### 2. Modifying Nodes and Serializing (Impossible in roxmltree)
+
+`roxmltree` cannot mutate document trees. In `oxml`:
+
+```rust
+use oxml::{Document, parse};
+
+let mut doc = parse("<library/>")?;
+let root = doc.root_element().unwrap();
+
+// Create and append a new book element
+let book = doc.create_element("book");
+doc.set_attribute(book, "id", "b2");
+doc.append_child(root, book);
+
+// Add text content
+let text = doc.create_text("Neuromancer");
+doc.append_child(book, text);
+
+// Serialize formatted output
+let output = doc.serialize();
+assert!(output.contains("<book id=\"b2\">Neuromancer</book>"));
+```
+
+### 3. Zero-Copy Streaming Borrowing
+
+Both libraries support zero-allocation scanning. In `oxml`, `Reader::next_borrowed()` yields `BorrowedEvent<'a>` items that borrow string slices directly from the input buffer:
+
+```rust
+use oxml::stream::{BorrowedEvent, Reader};
+
+let mut reader = Reader::new("<items><item id='1'>Data</item></items>")?;
+while let Some(event) = reader.next_borrowed()? {
+    if let BorrowedEvent::StartElement { name, attributes } = event {
+        println!("Element: {}", name.local);
+    }
+}
+```
+
+================================================================================

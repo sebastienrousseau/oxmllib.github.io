@@ -1,0 +1,41 @@
+# oxml
+
+> A high-performance, memory-safe XML toolkit for Rust and WebAssembly with zero unsafe code. Engineered with a contiguous generational arena DOM, a complete W3C XPath 1.0 engine, partial W3C XML Schema (XSD) validation, a CLI binary, and an official Model Context Protocol (MCP) server for AI agents.
+
+## Core Capabilities
+
+- [Quickstart & Installation](https://oxmllib.com/installation/): Adding oxml to Cargo.toml, feature flags (alloc, std, xpath, schema, wasm, json), and minimum supported Rust version (MSRV 1.80+).
+- [XPath 1.0 Query Engine](https://oxmllib.com/xpath/): Evaluating W3C XPath 1.0 expressions, 13 axes navigation, standard function library, and namespace-aware queries.
+- [XML Schema (XSD) Validator](https://oxmllib.com/schema/): Validating documents against W3C XML Schema 1.0 definitions with 95.2% conformance on the official W3C test suite.
+- [Command-Line Tool (CLI)](https://oxmllib.com/cli/): Fast terminal XML processing: query with XPath, validate schemas, format indentation, and inspect arena nodes.
+- [Model Context Protocol (MCP) Server](https://oxmllib.com/mcp/): Providing LLMs and AI agents (Claude Code, Cursor, Windsurf) with safe XML parsing, XPath queries, formatting, and XSD validation.
+- [WebAssembly Runtime (WASM)](https://oxmllib.com/wasm/): High-performance zero-copy browser and Node.js XML engine under 220 KB with no C dependencies or Emscripten glue.
+- [Language Server Protocol (LSP)](https://oxmllib.com/lsp/): Real-time editor analysis, syntax diagnostics, and schema-assisted completion for Neovim, VS Code, and Helix.
+- [Core Architecture & Generational Arena](https://oxmllib.com/architecture/): Internal design of the cache-friendly generational arena DOM, O(1) slot recycling, SWAR SIMD scanning, and zero-unsafe compile-time proof.
+
+## Comparison & Migration Guides
+
+- [Architectural Peer Comparisons](https://oxmllib.com/compare/): Transparent head-to-head comparison against quick-xml, roxmltree, xot, xee, and libxml2 with clear guidance on when to choose each crate.
+- [Reproducible Benchmarks](https://oxmllib.com/benchmarks/): Criterion streaming and DOM throughput numbers, memory overhead ratios, and XPath latency metrics on real-world datasets.
+- [W3C Standards Conformance](https://oxmllib.com/conformance/): Verification metrics for W3C XML 1.0 (xmlts20130923), W3C XML Schema (34,226 passing tests across 39,420 cases), and XPath 1.0.
+- [Security Architecture & Threat Model](https://oxmllib.com/security/): Compile-time memory safety, proactive mitigations against XXE, Billion Laughs, quadratic blowup attacks, and continuous fuzzing.
+
+## Practical Recipes & Integrations
+
+- [Cookbook & Code Recipes](https://oxmllib.com/cookbook/): Practical Rust code snippets: XML namespaces, SOAP envelope extraction, SVG manipulation, RSS parsing, and JSON twin conversion.
+- [Migration Guide from lxml (Python)](https://oxmllib.com/migrate-lxml/): Step-by-step guide for Python developers moving from lxml/libxml2 to memory-safe Rust with API mappings.
+- [Migration Guide from roxmltree](https://oxmllib.com/migrate-roxmltree/): Transitioning from read-only roxmltree to oxml when mutable DOM operations or XPath 1.0 queries are required.
+
+## Machine-Readable Full Context
+
+- [Full Documentation Text (Markdown)](https://oxmllib.com/llms-full.txt): Complete documentation concatenated into a single file for LLM ingestion.
+- [MCP Server Tool Definition](https://oxmllib.com/mcp/): Configuration snippets for Claude Code, Cursor, and VS Code.
+- [Interactive Playground](https://oxmllib.com/playground/): In-browser WASM evaluation with shareable permalinks and CLI translation.
+
+## Ecosystem Repositories
+
+- [oxml Core](https://github.com/sebastienrousseau/oxml): Streaming parser, arena tree, and XPath 1.0 engine.
+- [oxml-cli](https://github.com/sebastienrousseau/oxml-cli): Terminal XML query, formatting, inspection, and validation tool.
+- [oxml-mcp](https://github.com/sebastienrousseau/oxml-mcp): Model Context Protocol server exposing XML tools to LLMs.
+- [oxml-wasm](https://github.com/sebastienrousseau/oxml-wasm): WebAssembly bindings for browser and Node.js runtimes.
+- [xmlschema](https://github.com/sebastienrousseau/xmlschema): Pure-Rust W3C XML Schema validator with 95.2% conformance.

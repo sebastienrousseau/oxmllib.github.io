@@ -219,6 +219,21 @@ type = "string"
 required = false
 
 [[schemas.fields]]
+name = "nav_compare"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_benchmarks"
+type = "string"
+required = false
+
+[[schemas.fields]]
+name = "nav_security"
+type = "string"
+required = false
+
+[[schemas.fields]]
 name = "schema"
 type = "string"
 required = true

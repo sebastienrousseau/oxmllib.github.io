@@ -54,7 +54,45 @@
           "description": "{{description}}",
           "inLanguage": "{{language}}",
           "url": "{{permalink}}",
-          "author": { "@type": "Organization", "name": "{{author}}" }
+          "author": {
+            "@type": "Person",
+            "name": "{{author}}",
+            "sameAs": [
+              "https://github.com/sebastienrousseau",
+              "https://crates.io/users/sebastienrousseau"
+            ]
+          }
+        },
+        {
+          "@type": "SoftwareSourceCode",
+          "@id": "{{site_url}}#software",
+          "name": "oxml",
+          "description": "Pure Rust XML toolkit with zero unsafe code: parsing, mutable arena DOM, XPath 1.0, XSD 1.0 validation, CLI, WebAssembly, and MCP server.",
+          "programmingLanguage": "Rust",
+          "runtimePlatform": ["Linux", "macOS", "Windows", "WebAssembly"],
+          "codeRepository": "https://github.com/sebastienrousseau/oxml",
+          "license": "https://opensource.org/licenses/MIT",
+          "version": "0.0.10",
+          "author": {
+            "@type": "Person",
+            "name": "{{author}}",
+            "sameAs": [
+              "https://github.com/sebastienrousseau",
+              "https://crates.io/users/sebastienrousseau"
+            ]
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://oxmllib.com/cli/#application",
+          "name": "oxml-cli",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Linux, macOS, Windows",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
         },
         {
           "@type": "WebSite",

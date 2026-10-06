@@ -1533,3 +1533,46 @@ h1 {
     color: #090a0f;
   }
 }
+
+/* AI Agent Action Bar & Copy Markdown */
+.doc-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.btn-copy-md {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 38px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-copy-md:hover {
+  background: var(--line);
+  color: var(--accent);
+}
+.doc-agent-link {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  text-decoration: none;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--r-sm, 6px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.doc-agent-link:hover {
+  color: var(--accent);
+}
