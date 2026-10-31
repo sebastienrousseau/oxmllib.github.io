@@ -103,7 +103,7 @@ screenshot_alt: "The oxml interactive WebAssembly studio evaluating XPath querie
 <div class="playground-header">
 <div>
 <h2 class="playground-title">WebAssembly Engine (Live Sandbox)</h2>
-<p class="field-hint">Powered by <code>oxml-wasm 0.0.10</code> · 100% Client-Side Safe Rust · Zero Data Uploaded</p>
+<p class="field-hint">Powered by <code>oxml-wasm 0.0.13</code> · 100% Client-Side Safe Rust · Zero Data Uploaded</p>
 </div>
 <span id="playground-status" class="status-tag">Initializing engine...</span>
 </div>
@@ -290,7 +290,7 @@ screenshot_alt: "The oxml interactive WebAssembly studio evaluating XPath querie
 ## Why Test Here?
 
 1. **Sub-Millisecond Execution:**
-   - Powered by `oxml-wasm 0.0.10`, the core parsing engine allocates contiguous generational arenas with zero heap garbage-collection pauses. Queries typically execute in under 0.20 ms.
+   - Powered by `oxml-wasm 0.0.13`, the core parsing engine allocates contiguous generational arenas with zero heap garbage-collection pauses. Queries typically execute in under 0.20 ms.
 2. **True XPath 1.0 Specification:**
    - Full axis support (`child`, `parent`, `ancestor`, `descendant`, `following-sibling`, `attribute`), relational comparisons, numeric predicates, standard functions (`count`, `string`, `contains`, `starts-with`), and union operators (`path1 | path2`).
 3. **Realistic Diagnostics & Error Feedback:**

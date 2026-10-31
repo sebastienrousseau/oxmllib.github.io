@@ -4,13 +4,13 @@ version = 4
 
 [[package]]
 name = "oxml"
-version = "0.0.9"
+version = "0.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21cfe82a88f49f99d04270f9c40041e372b3fc12050c140e84e672810e82a651"
+checksum = "396a52ae51fc990e11a3333ec3ed6e218cfc9135595ff687e048d4643a48d1f1"
 
 [[package]]
 name = "oxml-site-snippets"
-version = "0.0.10"
+version = "0.0.13"
 dependencies = [
  "oxml",
 ]
