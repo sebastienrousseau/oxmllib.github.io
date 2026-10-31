@@ -105,7 +105,7 @@ Add `oxml` to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-oxml = "0.0.10"
+oxml = "0.0.13"
 ```
 
 Or install using the Cargo command line:
@@ -133,7 +133,7 @@ Enable features in your manifest:
 
 ```toml
 [dependencies]
-oxml = { version = "0.0.10", features = ["async", "tracing"] }
+oxml = { version = "0.0.13", features = ["async", "tracing"] }
 ```
 
 ## Satellite Tools

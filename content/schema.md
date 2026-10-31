@@ -105,7 +105,7 @@ Add `xmlschema` to your dependencies:
 
 ```toml
 [dependencies]
-xmlschema = "0.0.10"
+xmlschema = "0.0.13"
 ```
 
 ## Validation Example

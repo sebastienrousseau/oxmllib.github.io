@@ -42,7 +42,7 @@ const SAMPLES = {
     <description>Zero-unsafe XML high-throughput engineering</description>
     <language>en-gb</language>
     <item>
-      <title>v0.0.10: Zero-Copy Streaming Borrowing Released</title>
+      <title>v0.0.13: Zero-Copy Streaming Borrowing Released</title>
       <link>https://oxmllib.com/architecture/</link>
       <pubDate>Mon, 05 Oct 2026 10:00:00 GMT</pubDate>
     </item>
@@ -134,7 +134,7 @@ const SAMPLES = {
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.oxmllib</groupId>
   <artifactId>enterprise-gateway</artifactId>
-  <version>0.0.10</version>
+  <version>0.0.13</version>
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -348,7 +348,7 @@ async function bootstrap() {
     statusEl.textContent = 'Loading oxml-wasm WebAssembly binary...';
     await loadWasmWithRetry(3);
     wasmReady = true;
-    statusEl.textContent = 'oxml-wasm 0.0.10 engine active (#![forbid(unsafe_code)])';
+    statusEl.textContent = 'oxml-wasm 0.0.13 engine active (#![forbid(unsafe_code)])';
     statusEl.className = 'status-tag status-success';
   } catch (err) {
     statusEl.textContent = 'WASM initialization failed: ' + (err.message || err);
@@ -411,39 +411,92 @@ async function bootstrap() {
     runEvaluation();
   }
 
+  const XML_ENTITY_MAP = {
+    '&quot;': '"',
+    '&apos;': "'",
+    '&lt;': '<',
+    '&gt;': '>',
+    '&amp;': '&'
+  };
+
+  function decodeXmlEntities(str) {
+    return str.replace(/&(?:quot|apos|lt|gt|amp);/g, (entity) => XML_ENTITY_MAP[entity] || entity);
+  }
+
+  function parseXmlAttributes(attrStr) {
+    const attrs = {};
+    let count = 0;
+    const re = /([A-Za-z_][\w:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
+    let m;
+    while ((m = re.exec(attrStr)) !== null) {
+      attrs[m[1]] = decodeXmlEntities(m[2] !== undefined ? m[2] : m[3]);
+      count++;
+    }
+    return count > 0 ? attrs : null;
+  }
+
+  function appendChildElement(parentObj, tagName, childObj) {
+    if (!Object.prototype.hasOwnProperty.call(parentObj, tagName)) {
+      parentObj[tagName] = childObj;
+    } else if (Array.isArray(parentObj[tagName])) {
+      parentObj[tagName].push(childObj);
+    } else {
+      parentObj[tagName] = [parentObj[tagName], childObj];
+    }
+  }
+
+  function handleOpenElement(name, attrStr, selfClosing, stack, rootState) {
+    const elemObj = {};
+    const attrs = parseXmlAttributes(attrStr || '');
+    if (attrs) elemObj['@attributes'] = attrs;
+    if (selfClosing) {
+      if (stack.length === 0) {
+        rootState.name = name;
+        rootState.obj = elemObj;
+      } else {
+        appendChildElement(stack[stack.length - 1].obj, name, elemObj);
+      }
+    } else {
+      stack.push({ name, obj: elemObj });
+    }
+  }
+
+  function handleCloseElement(name, stack, rootState) {
+    const closed = stack.pop();
+    if (!closed || closed.name !== name) {
+      throw new Error('Mismatched closing tag');
+    }
+    if (stack.length === 0) {
+      rootState.name = closed.name;
+      rootState.obj = closed.obj;
+    } else {
+      appendChildElement(stack[stack.length - 1].obj, closed.name, closed.obj);
+    }
+  }
+
   function simpleXmlToJson(xml) {
     try {
-      const parser = new DOMParser();
-      const dom = parser.parseFromString(xml, 'text/xml');
-      function nodeToObj(node) {
-        if (node.nodeType === 3) return node.nodeValue.trim();
-        const obj = {};
-        if (node.attributes && node.attributes.length > 0) {
-          obj['@attributes'] = {};
-          for (let i = 0; i < node.attributes.length; i++) {
-            const a = node.attributes[i];
-            obj['@attributes'][a.nodeName] = a.nodeValue;
-          }
-        }
-        for (let i = 0; i < node.childNodes.length; i++) {
-          const child = node.childNodes[i];
-          if (child.nodeType === 3) {
-            const txt = child.nodeValue.trim();
-            if (txt) obj['#text'] = txt;
-          } else if (child.nodeType === 1) {
-            if (!obj[child.nodeName]) {
-              obj[child.nodeName] = nodeToObj(child);
-            } else {
-              if (!Array.isArray(obj[child.nodeName])) {
-                obj[child.nodeName] = [obj[child.nodeName]];
-              }
-              obj[child.nodeName].push(nodeToObj(child));
-            }
-          }
-        }
-        return obj;
+      if (/<!\s*(?:DOCTYPE|ENTITY)\b/i.test(xml)) {
+        return '{\n  "error": "DOCTYPE and ENTITY declarations are not permitted"\n}';
       }
-      return JSON.stringify({ [dom.documentElement.nodeName]: nodeToObj(dom.documentElement) }, null, 2);
+      const tokenRe = /<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!\[CDATA\[([\s\S]*?)\]\]>|<\/([A-Za-z_][\w:.-]*)\s*>|<([A-Za-z_][\w:.-]*)((?:\s+[A-Za-z_][\w:.-]*\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>|([^<]+)/g;
+      const stack = [];
+      const rootState = { name: null, obj: null };
+      let m;
+      while ((m = tokenRe.exec(xml)) !== null) {
+        if (m[1] !== undefined || m[6] !== undefined) {
+          const txt = (m[1] !== undefined ? m[1] : decodeXmlEntities(m[6])).trim();
+          if (txt && stack.length > 0) stack[stack.length - 1].obj['#text'] = txt;
+        } else if (m[2] !== undefined) {
+          handleCloseElement(m[2], stack, rootState);
+        } else if (m[3] !== undefined) {
+          handleOpenElement(m[3], m[4], m[5] === '/', stack, rootState);
+        }
+      }
+      if (!rootState.name || stack.length !== 0) {
+        throw new Error('Incomplete XML structure');
+      }
+      return JSON.stringify({ [rootState.name]: rootState.obj }, null, 2);
     } catch {
       return '{\n  "error": "Could not convert malformed XML to JSON twin"\n}';
     }
@@ -532,7 +585,7 @@ async function bootstrap() {
     } else if (currentOutputTab === 'stats') {
       outputEl.textContent = computeStats(xmlArea.value, currentDoc);
     } else if (currentOutputTab === 'json') {
-      outputEl.textContent = simpleXmlToJson(xmlArea.value);
+      outputEl.textContent = simpleXmlToJson(currentDoc.toXml());
     }
   }
 
@@ -560,15 +613,11 @@ async function bootstrap() {
     cliOutput.textContent = cmd;
   }
 
-  function buildDiagnosticReport(errMsg, xml) {
-    const diagContainer = document.getElementById('diag-container');
-    if (!diagContainer) return;
-
+  function parseErrorLocation(errMsg, xml) {
     let line = null;
     let col = null;
     const lineMatch = errMsg.match(/line\s*(\d+)/i) || errMsg.match(/at\s+(\d+):(\d+)/);
     const colMatch = errMsg.match(/col(?:umn)?\s*(\d+)/i);
-
     if (lineMatch) {
       line = parseInt(lineMatch[1], 10);
       if (lineMatch[2]) col = parseInt(lineMatch[2], 10);
@@ -576,79 +625,124 @@ async function bootstrap() {
     if (!col && colMatch) {
       col = parseInt(colMatch[1], 10);
     }
-
     if (!line) {
       const posMatch = errMsg.match(/position\s*(\d+)/i) || errMsg.match(/offset\s*(\d+)/i);
       if (posMatch) {
         const offset = parseInt(posMatch[1], 10);
-        const sub = xml.slice(0, offset);
-        const lines = sub.split('\n');
+        const lines = xml.slice(0, offset).split('\n');
         line = lines.length;
         col = lines[lines.length - 1].length + 1;
       }
     }
+    return { line, col };
+  }
 
-    let category = 'XML 1.0 Syntax';
-    let remediation = 'Verify that all tags are closed in reverse order of opening and special characters (&, <) are escaped as &amp; and &lt;.';
-
+  function classifyDiagnostic(errMsg) {
     if (/xpath/i.test(errMsg)) {
-      category = 'XPath 1.0 Expression';
-      remediation = 'Verify axis step syntax, closing square brackets on predicates, and valid standard function names (count, contains, starts-with).';
-    } else if (/namespace/i.test(errMsg)) {
-      category = 'XML Namespace';
-      remediation = 'Ensure the namespace prefix is declared via xmlns:prefix="..." on the element or an ancestor.';
-    } else if (/unclosed/i.test(errMsg) || /closing tag/i.test(errMsg)) {
-      category = 'Tag Closure Mismatch';
-      remediation = 'Check for missing closing tags or tags closed out of order.';
-    } else if (/quote|attribute/i.test(errMsg)) {
-      category = 'Attribute Syntax';
-      remediation = 'Attribute values must be enclosed in single or double quotes (e.g. id="value").';
+      return {
+        category: 'XPath 1.0 Expression',
+        remediation: 'Verify axis step syntax, closing square brackets on predicates, and valid standard function names (count, contains, starts-with).'
+      };
     }
+    if (/namespace/i.test(errMsg)) {
+      return {
+        category: 'XML Namespace',
+        remediation: 'Ensure the namespace prefix is declared via xmlns:prefix="..." on the element or an ancestor.'
+      };
+    }
+    if (/unclosed|closing tag/i.test(errMsg)) {
+      return {
+        category: 'Tag Closure Mismatch',
+        remediation: 'Check for missing closing tags or tags closed out of order.'
+      };
+    }
+    if (/quote|attribute/i.test(errMsg)) {
+      return {
+        category: 'Attribute Syntax',
+        remediation: 'Attribute values must be enclosed in single or double quotes (e.g. id="value").'
+      };
+    }
+    return {
+      category: 'XML 1.0 Syntax',
+      remediation: 'Verify that all tags are closed in reverse order of opening and special characters (&, <) are escaped as &amp; and &lt;.'
+    };
+  }
 
-    let snippetHtml = '';
-    if (line && xml) {
-      const allLines = xml.split('\n');
-      const start = Math.max(0, line - 2);
-      const end = Math.min(allLines.length, line + 1);
-      const linesOut = [];
-      for (let i = start; i < end; i++) {
-        const lineNum = i + 1;
-        const lineContent = allLines[i] || '';
-        const escaped = lineContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        if (lineNum === line) {
-          linesOut.push(`<span class="diag-highlight"><span class="diag-line-num">${lineNum}:</span>${escaped}</span>`);
-          if (col && col > 0) {
-            const pad = ' '.repeat(String(lineNum).length + 2 + Math.max(0, col - 1));
-            linesOut.push(`<span class="diag-pointer">${pad}^ ${errMsg}</span>`);
-          }
-        } else {
-          linesOut.push(`<span><span class="diag-line-num">${lineNum}:</span>${escaped}</span>`);
-        }
+  function createEl(tag, className, text) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
+
+  function appendDiagRow(tbody, label, value) {
+    const tr = document.createElement('tr');
+    const th = createEl('th', '', label);
+    th.setAttribute('scope', 'row');
+    const td = createEl('td', '', value);
+    tr.appendChild(th);
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+
+  function buildSnippetNode(xml, line, col, errMsg) {
+    if (!line || !xml) return null;
+    const snippet = createEl('div', 'diag-snippet');
+    const allLines = xml.split('\n');
+    const start = Math.max(0, line - 2);
+    const end = Math.min(allLines.length, line + 1);
+    for (let i = start; i < end; i++) {
+      if (i > start) snippet.appendChild(document.createTextNode('\n'));
+      const lineNum = i + 1;
+      const row = createEl('span', lineNum === line ? 'diag-highlight' : '');
+      row.appendChild(createEl('span', 'diag-line-num', `${lineNum}:`));
+      row.appendChild(document.createTextNode(allLines[i] || ''));
+      snippet.appendChild(row);
+      if (lineNum === line && col && col > 0) {
+        snippet.appendChild(document.createTextNode('\n'));
+        const pad = ' '.repeat(String(lineNum).length + 2 + Math.max(0, col - 1));
+        snippet.appendChild(createEl('span', 'diag-pointer', `${pad}^ ${errMsg}`));
       }
-      snippetHtml = `<div class="diag-snippet">${linesOut.join('\n')}</div>`;
     }
+    return snippet;
+  }
 
-    diagContainer.innerHTML = `
-      <div class="diag-card" role="alert" aria-live="assertive">
-        <div class="diag-header">
-          <span class="diag-title">
-            <span>⚠ Parser Failure Diagnostics</span>
-            <span class="diag-badge">${category}</span>
-          </span>
-          <span class="field-hint">${line ? `Line ${line}${col ? `, Col ${col}` : ''}` : 'Location detected'}</span>
-        </div>
-        <div class="diag-body">
-          <table class="diag-table">
-            <tbody>
-              <tr><th scope="row">Error Description</th><td>${errMsg}</td></tr>
-              ${line ? `<tr><th scope="row">Line / Column</th><td>Line ${line}, Column ${col || 1}</td></tr>` : ''}
-              <tr><th scope="row">Suggested Remediation</th><td>${remediation}</td></tr>
-            </tbody>
-          </table>
-          ${snippetHtml}
-        </div>
-      </div>
-    `;
+  function buildDiagnosticReport(errMsg, xml) {
+    const diagContainer = document.getElementById('diag-container');
+    if (!diagContainer) return;
+
+    const { line, col } = parseErrorLocation(errMsg, xml);
+    const { category, remediation } = classifyDiagnostic(errMsg);
+
+    const card = createEl('div', 'diag-card');
+    card.setAttribute('role', 'alert');
+    card.setAttribute('aria-live', 'assertive');
+
+    const header = createEl('div', 'diag-header');
+    const titleWrap = createEl('span', 'diag-title');
+    titleWrap.appendChild(createEl('span', '', '⚠ Parser Failure Diagnostics'));
+    titleWrap.appendChild(createEl('span', 'diag-badge', category));
+    const locLabel = line ? `Line ${line}${col ? `, Col ${col}` : ''}` : 'Location detected';
+    header.appendChild(titleWrap);
+    header.appendChild(createEl('span', 'field-hint', locLabel));
+
+    const body = createEl('div', 'diag-body');
+    const table = createEl('table', 'diag-table');
+    const tbody = document.createElement('tbody');
+    appendDiagRow(tbody, 'Error Description', errMsg);
+    if (line) {
+      appendDiagRow(tbody, 'Line / Column', `Line ${line}, Column ${col || 1}`);
+    }
+    appendDiagRow(tbody, 'Suggested Remediation', remediation);
+    table.appendChild(tbody);
+    body.appendChild(table);
+
+    const snippet = buildSnippetNode(xml, line, col, errMsg);
+    if (snippet) body.appendChild(snippet);
+
+    card.appendChild(header);
+    card.appendChild(body);
+    diagContainer.replaceChildren(card);
     diagContainer.hidden = false;
   }
 

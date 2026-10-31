@@ -103,7 +103,7 @@ screenshot_alt: "Le studio interactif WebAssembly oxml évaluant des requêtes X
 <div class="playground-header">
 <div>
 <h2 class="playground-title">Moteur WebAssembly (Bac à Sable Local)</h2>
-<p class="field-hint">Propulsé par <code>oxml-wasm 0.0.10</code> · 100 % Rust Sûr Côté Client · Zéro Donnée Transmise</p>
+<p class="field-hint">Propulsé par <code>oxml-wasm 0.0.13</code> · 100 % Rust Sûr Côté Client · Zéro Donnée Transmise</p>
 </div>
 <span id="playground-status" class="status-tag">Initialisation du moteur...</span>
 </div>
@@ -290,7 +290,7 @@ screenshot_alt: "Le studio interactif WebAssembly oxml évaluant des requêtes X
 ## Pourquoi Tester Ici ?
 
 1. **Exécution Sub-Milliseconde :**
-   - Propulsé par `oxml-wasm 0.0.10`, le cœur du moteur d'analyse alloue des arènes contiguës générationnelles sans pause de ramasse-miettes. Les requêtes s'exécutent généralement en moins de 0,20 ms.
+   - Propulsé par `oxml-wasm 0.0.13`, le cœur du moteur d'analyse alloue des arènes contiguës générationnelles sans pause de ramasse-miettes. Les requêtes s'exécutent généralement en moins de 0,20 ms.
 2. **Spécification XPath 1.0 Intégrale :**
    - Prise en charge complète des axes (`child`, `parent`, `ancestor`, `descendant`, `following-sibling`, `attribute`), comparaisons relationnelles, prédicats numériques, fonctions standard (`count`, `string`, `contains`, `starts-with`) et opérateurs d'union (`path1 | path2`).
 3. **Diagnostics & Scénarios d'Erreurs Réalistes :**
