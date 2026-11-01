@@ -235,6 +235,23 @@ def main():
                 if slug_dir.exists():
                     (slug_dir / "index.md").write_text(clean_body, encoding="utf-8")
 
+        urls = sorted(
+            "https://oxmllib.com/"
+            if idx.parent == PUBLIC_DIR
+            else f"https://oxmllib.com/{idx.parent.relative_to(PUBLIC_DIR).as_posix()}/"
+            for idx in PUBLIC_DIR.rglob("index.html")
+            if not {"_csp", "404", "offline", "thanks"} & set(idx.relative_to(PUBLIC_DIR).parts)
+        )
+        items = "\n".join(
+            f"  <url>\n    <loc>{u}</loc>\n    <changefreq>weekly</changefreq>\n  </url>"
+            for u in urls
+        )
+        (PUBLIC_DIR / "sitemap.xml").write_text(
+            f'<?xml version="1.0" encoding="UTF-8"?>\n'
+            f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{items}\n</urlset>\n',
+            encoding="utf-8",
+        )
+
     print(f"Generated llms.txt ({len(llms_txt)} bytes) and llms-full.txt ({len(llms_full)} bytes).")
 
 if __name__ == "__main__":
